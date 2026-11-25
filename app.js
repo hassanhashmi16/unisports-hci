@@ -4,6 +4,7 @@ import {
 
 import { bracket, matchRow, renderFixtures, renderMatch, scheduleFilters } from "./fixtures.js";
 import { registerLabel, renderRegistration } from "./registration.js";
+import { findEntry, renderEntries } from "./entries.js";
 import { enableSharing, href, longDate, shareControl, shortDate, timeLabel } from "./ui.js";
 
 const main = document.querySelector("main");
@@ -160,6 +161,8 @@ function entryRule(sport, category) {
 
 function renderTournament(sport, category, filters) {
   const open = isOpen(sport);
+  let entry;
+  try { entry = findEntry(sport, category); } catch { /* Tournament information is public even if storage is unavailable. */ }
   main.innerHTML = `<a class="back-link" href="${href("/", filters)}">All tournaments</a>
     <div class="page-heading detail-heading">
       <h1 tabindex="-1">${sport.name}</h1>
@@ -189,7 +192,7 @@ function renderTournament(sport, category, filters) {
           <div><dt>Venue</dt><dd>${sport.venue}</dd></div>
           ${open ? "<div><dt>Payment</dt><dd>Pay at the Student Centre after submitting your entry.</dd></div>" : ""}
         </dl>
-        ${open ? `<div class="entry-actions"><a class="primary-action" href="#/register/${sport.id}/${category.id}">${registerLabel[category.kind]}</a></div>` : ""}
+        ${entry || open ? `<div class="entry-actions"><a class="primary-action" href="${entry ? "#/entries/" + encodeURIComponent(entry.id) : "#/register/" + sport.id + "/" + category.id}">${entry ? "View my entry" : registerLabel[category.kind]}</a></div>` : ""}
         ${shareControl("event")}
       </section>
     </div>
@@ -206,18 +209,31 @@ function renderRoute(moveFocus = false) {
   const category = sport && (categoryId ? getCategory(sport, categoryId) : sport.categories[0]);
   const changingCategory = sport && sport.id === lastSport;
 
-  const fixtureSection = section === "matches" || path === "/fixtures";
+  const entrySection = section === "entries" || (section === "register" && extra === "edit-roster");
+  const active = entrySection ? "#/entries" : section === "matches" || path === "/fixtures" ? "#/fixtures" : "#/";
   for (const link of document.querySelectorAll(".primary-nav a")) {
-    if (link.hash === (fixtureSection ? "#/fixtures" : "#/")) link.setAttribute("aria-current", "true");
+    if (link.hash === active) link.setAttribute("aria-current", "true");
     else link.removeAttribute("aria-current");
   }
   let focusTarget = "h1";
   if (path === "/") {
     document.title = "Tournaments · UniSports";
     renderHome(filters);
-  } else if (section === "register" && sport && categoryId && category &&
-      (path === `/register/${sportId}/${categoryId}` || path === `/register/${sportId}/${categoryId}/review`)) {
-    focusTarget = renderRegistration(main, sport, category, extra, query);
+  } else if (section === "entries" || (section === "register" && sport && categoryId && category &&
+      /^\/register\/[^/]+\/[^/]+(?:\/edit-roster)?(?:\/review)?$/.test(path))) {
+    try {
+      if (section === "entries") {
+        renderEntries(main, sportId, query.get("updated") === "1");
+        if (query.has("updated")) history.replaceState(null, "", "#" + path);
+      } else {
+        focusTarget = renderRegistration(main, sport, category, path.endsWith("/review") ? "review" : "details", query, extra === "edit-roster");
+      }
+    } catch (error) {
+      console.error("Unable to load entry", error);
+      document.title = "Entries unavailable · UniSports";
+      main.innerHTML = '<h1 tabindex="-1">Cannot load saved entries</h1><p>Check browser storage access, then try again.</p><button class="text-button">Try again</button>';
+      main.querySelector("button").onclick = () => renderRoute(true);
+    }
   } else if (section === "tournaments" && !extra && sport && category) {
     document.title = `${sport.name} · UniSports`;
     renderTournament(sport, category, filters);
@@ -251,4 +267,7 @@ document.querySelector(".skip-link").addEventListener("click", event => {
   main.focus();
 });
 window.addEventListener("hashchange", () => renderRoute(true));
+window.addEventListener("storage", () => {
+  if (/^#\/(entries|tournaments)(\/|$)/.test(location.hash)) renderRoute();
+});
 renderRoute();

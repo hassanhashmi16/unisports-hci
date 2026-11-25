@@ -8,6 +8,9 @@ const time = new Intl.DateTimeFormat("en-PK", {
 });
 export const timeLabel = value => time.format(new Date(value)).toUpperCase();
 export const href = (path, filters) => `#${path}${filters?.size ? `?${filters}` : ""}`;
+export const escapeText = value => value.replace(/[&<>"']/g, char => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+})[char]);
 
 export function shareControl(label) {
   return `<div class="share">

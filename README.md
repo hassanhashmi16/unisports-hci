@@ -14,7 +14,9 @@ Open [localhost:8000](http://localhost:8000/) to browse and filter tournaments, 
 
 In **Fixtures & Results**, look up Falcons to see the revised volleyball semifinal. Switch to **Results** and search for Omar to follow the completed chess quarterfinal into its bracket. A match's copy-link action shares its public details. The browser Back action restores the preceding list and filters.
 
-For **registration through review**, open Football, choose **Register a team**, and enter a team name and five fictional players. Try the same roll number on two rows, correct it, then use **Continue to review**. Each player's edit link returns to their roll number. Singles and doubles use the same flow with one or two players. Drafts stay in memory while navigating the app. Reloading clears them. Submission, receipts and My Entries belong to the next increment.
+To try registration, open Football, choose **Register a team**, and enter a team name and five fictional players. Use **Continue to review**, then **Submit entry**. The receipt gives the team's reference, payment instructions and verification status. Open **My Entries** to revisit it after refresh or correct its roster before the deadline. Saving a correction keeps the reference. The confirmed Falcons entry demonstrates the outcome of office verification and links to its rescheduled semifinal.
+
+Singles and doubles use the same flow with one or two players. Drafts stay in memory while navigating. Submitted entries use this browser's local storage. For this frontend demonstration, one device represents one student, with one entry per tournament category. Use fictional details.
 
 Start with the [MVP plan](UniSports%20MVP%20Plan.md) for the agreed registration flows, page inventory and open decisions. Use the [Applied HCI skill](skills/applied-hci/SKILL.md), [lecture notes](skills/applied-hci/references/lecture-notes.md) and [evaluation guide](skills/applied-hci/references/project-evaluation.md) when reviewing a design.
 

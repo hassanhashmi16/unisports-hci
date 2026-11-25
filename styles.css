@@ -320,6 +320,9 @@ select, input {
 .entry-body dialog { color: var(--ink); border: 1px solid var(--rule); max-width: min(26rem, 90vw); padding: 1.25rem; }
 .entry-body dialog p { margin-block: .6rem 1rem; }
 .entry-body dialog::backdrop { background: rgb(16 26 43 / .55); }
+.local-note { margin-block: 1rem; }
+.entries-list > li { padding: .65rem 1rem; }
+.receipt-link { display: inline-flex; align-items: center; min-height: 2.75rem; font-weight: 700; }
 @media (min-width: 44rem) {
   .entry-layout { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
   .entry-summary { grid-column: 2; grid-row: 1; }

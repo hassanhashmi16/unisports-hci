@@ -1,12 +1,10 @@
 import { fees, isOpen } from "./data.js";
-import { shortDate, timeLabel } from "./ui.js";
+import { shortDate, timeLabel, escapeText } from "./ui.js";
+import { canEditRoster, findEntry, saveEntry } from "./entries.js";
 
 // Drafts belong to this tab and event. Only a later submission creates an entry.
 const drafts = new Map();
 const blankPlayer = () => ({ name: "", roll: "" });
-const escapeText = value => value.replace(/[&<>"']/g, char => ({
-  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-})[char]);
 
 export const registerLabel = {
   solo: "Register as an individual", pair: "Register a pair", team: "Register a team",
@@ -45,13 +43,23 @@ function field(id, label, value, limit) {
     <span class="field-error" id="${id}-error"></span></div>`;
 }
 
-export function renderRegistration(main, sport, category, step, query) {
-  const key = `${sport.id}/${category.id}`;
+export function renderRegistration(main, sport, category, step, query, editing = false) {
+  const event = `${sport.id}/${category.id}`;
+  const key = event + (editing ? "/edit-roster" : "");
   const base = `#/register/${key}`;
-  const eventLink = `#/tournaments/${key}`;
+  const stored = findEntry(sport, category);
+  const receipt = stored && "#/entries/" + encodeURIComponent(stored.id);
+  const eventLink = editing && receipt ? receipt : `#/tournaments/${event}`;
   const kind = category.kind;
   const team = kind === "team";
   const fee = fees[kind];
+  if (editing ? !canEditRoster(stored, sport, category) : stored) {
+    document.title = "Entry status · UniSports";
+    main.innerHTML = `<h1 tabindex="-1">${editing ? "Roster editing unavailable" : "Entry already received"}</h1>
+      <p>${editing ? "The team entry must be pending and registration still open. Contact the Student Centre for corrections." : "You have an entry in this category."}</p>
+      <a class="back-link" href="${receipt || eventLink}">${receipt ? "View my entry" : "Tournament details"}</a>`;
+    return "h1";
+  }
   if (!isOpen(sport)) {
     document.title = `Registration closed · ${sport.name} · UniSports`;
     main.innerHTML = `<h1 tabindex="-1">Registration closed</h1>
@@ -60,7 +68,8 @@ export function renderRegistration(main, sport, category, step, query) {
   }
   if (!drafts.has(key)) {
     const count = team ? sport.min : kind === "pair" ? 2 : 1;
-    drafts.set(key, { team: "", players: Array.from({ length: count }, blankPlayer) });
+    drafts.set(key, editing ? { team: stored.team, players: structuredClone(stored.players), original: stored } :
+      { team: "", players: Array.from({ length: count }, blankPlayer) });
   }
   const draft = drafts.get(key);
   const reviewing = step === "review" && errorsFor(draft, sport, kind).size === 0;
@@ -74,8 +83,8 @@ export function renderRegistration(main, sport, category, step, query) {
       <div><dt>Deadline</dt><dd>${shortDate.format(new Date(sport.closes))}, ${timeLabel(sport.closes)} Lahore time</dd></div>
       <div><dt>Payment</dt><dd>After submission, pay at the Student Centre and give staff your entry reference.</dd></div>
     </dl></aside>`;
-  main.innerHTML = `<a class="back-link" href="${eventLink}">Back to ${sport.name}</a>
-    <div class="page-heading"><h1 tabindex="-1">${reviewing ? "Review entry" : "Registration details"}</h1>
+  main.innerHTML = `<a class="back-link" href="${eventLink}">${editing ? "View saved entry" : "Back to " + sport.name}</a>
+    <div class="page-heading"><h1 tabindex="-1">${reviewing ? "Review entry" : editing ? "Edit roster" : "Registration details"}</h1>
       <span>${sport.name} · ${category.name}</span></div>
     <ol class="entry-progress" aria-label="Registration progress">
       ${["Details", "Review", "Receipt"].map((name, i) => `<li ${i === Number(reviewing) ? 'aria-current="step"' : ""}>${i + 1}. ${name}</li>`).join("")}
@@ -83,14 +92,48 @@ export function renderRegistration(main, sport, category, step, query) {
   const body = main.querySelector(".entry-body");
   if (reviewing) {
     body.innerHTML = `<header class="panel-heading"><h2>${team ? "Team entry" : kind === "pair" ? "Pair entry" : "Individual entry"}</h2>
-      <p>Draft · Your entry has not been submitted.</p></header>
+      <p>${editing ? "Check your changes before saving the roster." : "Submitting creates an entry pending Student Centre verification."}</p></header>
       ${team ? `<div class="review-row"><div><small>Team name</small><strong>${escapeText(draft.team)}</strong></div>
         <a href="${base}?edit=team">Edit team name</a></div>` : ""}
       ${draft.players.map((player, index) => `<div class="review-row">
         <div><small>${playerLabel(kind, index)}</small><strong>${escapeText(player.name.trim())}</strong>
         <span>${escapeText(player.roll.trim().toUpperCase())}</span></div>
         <a href="${base}?edit=roll-${index}" aria-label="Edit details for ${escapeText(player.name.trim())}">Edit details</a>
-      </div>`).join("")}`;
+      </div>`).join("")}
+      <div class="entry-actions"><button type="button" class="primary-action" id="save-entry">${editing ? "Save changes" : "Submit entry"}</button>
+      ${editing ? '<button type="button" class="text-button" id="cancel-edit">Cancel changes</button>' : ""}
+      <span role="status" id="save-status"></span></div>`;
+    body.querySelector("#cancel-edit")?.addEventListener("click", () => {
+      drafts.delete(key);
+      location.hash = receipt;
+    });
+    const save = body.querySelector("#save-entry");
+    const status = body.querySelector("#save-status");
+    save.addEventListener("click", async () => {
+      if (save.disabled) return;
+      save.disabled = true;
+      status.textContent = "Saving…";
+      try {
+        const result = await saveEntry(sport, category, draft, draft.original);
+        if (!result.entry) {
+          status.textContent = result.message;
+          if (result.existing) {
+            drafts.delete(key);
+            const link = document.createElement("a");
+            link.href = "#/entries/" + encodeURIComponent(result.existing.id);
+            link.textContent = "View my entry";
+            status.append(" ", link);
+          }
+          return;
+        }
+        drafts.delete(key);
+        if (save.isConnected) location.replace("#/entries/" + encodeURIComponent(result.entry.id) + (editing ? "?updated=1" : ""));
+      } catch {
+        status.textContent = "Couldn’t save on this browser. Your details are still here.";
+        save.textContent = "Try again";
+        save.disabled = false;
+      }
+    });
     return "h1";
   }
 
@@ -106,11 +149,11 @@ export function renderRegistration(main, sport, category, step, query) {
       <span class="field-error" id="add-player-error"></span></div>` : ""}
     <p role="status" class="entry-feedback"></p>
     <div class="entry-actions"><button type="submit" class="primary-action">Continue to review</button>
-    <button type="button" class="text-button" id="discard-entry">Discard entry</button></div></form>
-    <dialog aria-labelledby="discard-title"><h2 id="discard-title">Discard this entry?</h2>
-      <p>This clears the details entered for ${sport.name} · ${category.name}.</p>
+    <button type="button" class="text-button" id="discard-entry">${editing ? "Cancel changes" : "Discard entry"}</button></div></form>
+    <dialog aria-labelledby="discard-title"><h2 id="discard-title">${editing ? "Discard roster changes?" : "Discard this entry?"}</h2>
+      <p>${editing ? "Your previously submitted roster will be kept." : `This clears the details entered for ${sport.name} · ${category.name}.`}</p>
       <form method="dialog" class="entry-actions"><button class="primary-action" value="keep" autofocus>Keep editing</button>
-      <button class="text-button" value="discard">Discard entry</button></form></dialog>`;
+      <button class="text-button" value="discard">${editing ? "Discard changes" : "Discard entry"}</button></form></dialog>`;
   const form = body.querySelector(".entry-form");
   const feedback = form.querySelector(".entry-feedback");
   let removed;
