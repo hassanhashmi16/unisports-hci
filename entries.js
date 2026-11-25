@@ -33,6 +33,9 @@ export const canEditRoster = (entry, sport, category) =>
 
 export async function saveEntry(sport, category, draft, original) {
   const key = storageKey(sport, category);
+  // The lock may queue this write while the draft is still editable.
+  const team = draft.team;
+  const players = draft.players.map(player => ({ ...player }));
   function write() {
     const current = findEntry(sport, category);
     if (!isOpen(sport)) return { message: "Registration has closed. Contact the Student Centre for help." };
@@ -46,7 +49,7 @@ export async function saveEntry(sport, category, draft, original) {
     const entry = {
       id: original?.id ?? "US-" + crypto.randomUUID().slice(0, 8).toUpperCase(),
       sport: sport.id, category: category.id, status: pending,
-      revision: (current?.revision ?? 0) + 1, team: draft.team, players: draft.players,
+      revision: (current?.revision ?? 0) + 1, team, players,
     };
     localStorage.setItem(key, JSON.stringify(entry));
     return { entry };

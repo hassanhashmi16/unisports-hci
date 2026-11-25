@@ -206,7 +206,9 @@ function renderRoute(moveFocus = false) {
   const { path, filters, query } = readRoute();
   const [, section, sportId, categoryId, extra] = path.split("/");
   const sport = getSport(sportId);
-  const category = sport && (categoryId ? getCategory(sport, categoryId) : sport.categories[0]);
+  const eligibility = filters.get("eligibility");
+  const defaultCategory = sport?.categories.find(option => option.eligibility === eligibility) ?? sport?.categories[0];
+  const category = categoryId ? getCategory(sport, categoryId) : defaultCategory;
   const changingCategory = sport && sport.id === lastSport;
 
   const entrySection = section === "entries" || (section === "register" && extra === "edit-roster");
