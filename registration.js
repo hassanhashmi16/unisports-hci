@@ -43,6 +43,29 @@ function field(id, label, value, limit) {
     <span class="field-error" id="${id}-error"></span></div>`;
 }
 
+function addDiscardDialog(body, key, eventLink, editing) {
+  body.insertAdjacentHTML("beforeend", `<dialog aria-labelledby="discard-title">
+    <h2 id="discard-title">${editing ? "Discard roster changes?" : "Discard this entry?"}</h2>
+    <p>${editing ? "Your previously submitted roster will be kept." : "This clears the details entered for this event."}</p>
+    <form method="dialog" class="entry-actions"><button class="primary-action" value="keep" autofocus>Keep editing</button>
+      <button class="text-button" value="discard">${editing ? "Discard changes" : "Discard entry"}</button>
+    </form></dialog>`);
+  const dialog = body.querySelector("dialog");
+  const trigger = body.querySelector("#discard-entry");
+  trigger.addEventListener("click", () => {
+    dialog.returnValue = "";
+    dialog.showModal();
+  });
+  dialog.addEventListener("close", () => {
+    if (dialog.returnValue === "discard") {
+      drafts.delete(key);
+      location.hash = eventLink;
+    } else {
+      trigger.focus();
+    }
+  });
+}
+
 export function renderRegistration(main, sport, category, step, query, editing = false) {
   const event = `${sport.id}/${category.id}`;
   const key = event + (editing ? "/edit-roster" : "");
@@ -101,17 +124,16 @@ export function renderRegistration(main, sport, category, step, query, editing =
         <a href="${base}?edit=roll-${index}" aria-label="Edit details for ${escapeText(player.name.trim())}">Edit details</a>
       </div>`).join("")}
       <div class="entry-actions"><button type="button" class="primary-action" id="save-entry">${editing ? "Save changes" : "Submit entry"}</button>
-      ${editing ? '<button type="button" class="text-button" id="cancel-edit">Cancel changes</button>' : ""}
+      ${editing ? '<button type="button" class="text-button" id="discard-entry">Cancel changes</button>' : ""}
       <span role="status" id="save-status"></span></div>`;
-    body.querySelector("#cancel-edit")?.addEventListener("click", () => {
-      drafts.delete(key);
-      location.hash = receipt;
-    });
+    if (editing) addDiscardDialog(body, key, eventLink, editing);
     const save = body.querySelector("#save-entry");
+    const discard = body.querySelector("#discard-entry");
     const status = body.querySelector("#save-status");
     save.addEventListener("click", async () => {
       if (save.disabled) return;
       save.disabled = true;
+      if (discard) discard.disabled = true;
       status.textContent = "Saving…";
       try {
         const result = await saveEntry(sport, category, draft, draft.original);
@@ -132,6 +154,8 @@ export function renderRegistration(main, sport, category, step, query, editing =
         status.textContent = "Couldn’t save on this browser. Your details are still here.";
         save.textContent = "Try again";
         save.disabled = false;
+      } finally {
+        if (discard) discard.disabled = false;
       }
     });
     return "h1";
@@ -149,11 +173,7 @@ export function renderRegistration(main, sport, category, step, query, editing =
       <span class="field-error" id="add-player-error"></span></div>` : ""}
     <p role="status" class="entry-feedback"></p>
     <div class="entry-actions"><button type="submit" class="primary-action">Continue to review</button>
-    <button type="button" class="text-button" id="discard-entry">${editing ? "Cancel changes" : "Discard entry"}</button></div></form>
-    <dialog aria-labelledby="discard-title"><h2 id="discard-title">${editing ? "Discard roster changes?" : "Discard this entry?"}</h2>
-      <p>${editing ? "Your previously submitted roster will be kept." : `This clears the details entered for ${sport.name} · ${category.name}.`}</p>
-      <form method="dialog" class="entry-actions"><button class="primary-action" value="keep" autofocus>Keep editing</button>
-      <button class="text-button" value="discard">${editing ? "Discard changes" : "Discard entry"}</button></form></dialog>`;
+    <button type="button" class="text-button" id="discard-entry">${editing ? "Cancel changes" : "Discard entry"}</button></div></form>`;
   const form = body.querySelector(".entry-form");
   const feedback = form.querySelector(".entry-feedback");
   let removed;
@@ -237,17 +257,7 @@ export function renderRegistration(main, sport, category, step, query, editing =
     }
     location.hash = base + "/review";
   });
-  const dialog = body.querySelector("dialog");
-  form.querySelector("#discard-entry").addEventListener("click", () => {
-    dialog.returnValue = "";
-    dialog.showModal();
-  });
-  dialog.addEventListener("close", () => {
-    if (dialog.returnValue === "discard") {
-      drafts.delete(key);
-      location.hash = eventLink;
-    }
-  });
+  addDiscardDialog(body, key, eventLink, editing);
   const edit = query.get("edit");
   if (edit && /^(team|(name|roll)-\d+)$/.test(edit) && document.getElementById(edit)) return "#" + edit;
   return "h1";

@@ -114,6 +114,7 @@ export function renderMatch(main, match, params) {
   const sport = getSport(match.sport);
   const category = getCategory(sport, match.category);
   const event = `/tournaments/${sport.id}/${category.id}`;
+  const previous = match.previous ?? (isPending(match) ? match : null);
   main.innerHTML = `<a class="back-link" href="${href("/fixtures", params)}">Fixtures &amp; Results</a>
     <div class="page-heading detail-heading"><h1 tabindex="-1">${match.sides.join(" vs ")}</h1>
       <span class="status ${match.status.toLowerCase()}">${match.status}</span></div>
@@ -121,9 +122,9 @@ export function renderMatch(main, match, params) {
       <p>${category.name}</p></header><dl class="detail-list">
       ${match.result ? `<div><dt>Result</dt><dd><strong>${match.result}</strong></dd></div>` : ""}
       <div><dt>${isPending(match) ? "Match time" : "Start time"}</dt><dd><strong>${isPending(match) ? "Revised time pending" : stamp(match.when) + " Lahore time"}</strong></dd></div>
-      <div><dt>${isPending(match) ? "Original venue" : "Venue"}</dt><dd>${match.venue}</dd></div>
-      ${match.previous ? `<div><dt>Previously scheduled</dt><dd>${stamp(match.previous.when)} · ${match.previous.venue}</dd></div>
-        <div><dt>Update posted</dt><dd>${stamp(match.updated)} Lahore time</dd></div>` : ""}
+      ${!isPending(match) ? `<div><dt>Venue</dt><dd>${match.venue}</dd></div>` : ""}
+      ${previous ? `<div><dt>Previously scheduled</dt><dd>${stamp(previous.when)} · ${previous.venue}</dd></div>` : ""}
+      ${match.updated ? `<div><dt>Update posted</dt><dd>${stamp(match.updated)} Lahore time</dd></div>` : ""}
       </dl><div class="share"><a class="back-link" href="${href(event, new URLSearchParams({ section: "bracket" }))}">View tournament bracket</a></div>
       ${shareControl("match")}</section>`;
   enableSharing(main, "/matches/" + match.id, "Match");

@@ -18,6 +18,8 @@ To try registration, open Football, choose **Register a team**, and enter a team
 
 Singles and doubles use the same flow with one or two players. Drafts stay in memory while navigating. Submitted entries use this browser's local storage. For this frontend demonstration, one device represents one student, with one entry per tournament category. Use fictional details.
 
+The [heuristic evaluation](evaluation/heuristic-review.md) records the inspection findings, before-and-after screenshots, retest results and participant walkthrough prompts.
+
 Start with the [MVP plan](UniSports%20MVP%20Plan.md) for the agreed registration flows, page inventory and open decisions. Use the [Applied HCI skill](skills/applied-hci/SKILL.md), [lecture notes](skills/applied-hci/references/lecture-notes.md) and [evaluation guide](skills/applied-hci/references/project-evaluation.md) when reviewing a design.
 
 Links in the planning documents to original reports, the survey, Classroom files and the course source index refer to the team's local materials.

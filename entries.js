@@ -6,17 +6,24 @@ const pending = "Pending verification";
 const storageKey = (sport, category) => prefix + sport.id + "/" + category.id;
 const receiptLink = entry => "#/entries/" + encodeURIComponent(entry.id);
 
+class UnreadableEntry extends Error {}
+
 export function findEntry(sport, category) {
   if (sport.id === confirmedEntry.sport && category.id === confirmedEntry.category) return confirmedEntry;
   const raw = localStorage.getItem(storageKey(sport, category));
   if (raw === null) return null;
-  const entry = JSON.parse(raw);
+  let entry;
+  try {
+    entry = JSON.parse(raw);
+  } catch {
+    throw new UnreadableEntry("Saved entry data cannot be read.");
+  }
   if (!entry || entry.sport !== sport.id || entry.category !== category.id ||
       typeof entry.id !== "string" || typeof entry.team !== "string" ||
       ![pending, "Confirmed"].includes(entry.status) || !Number.isInteger(entry.revision) ||
       !Array.isArray(entry.players) || !entry.players.length ||
       !entry.players.every(player => player && typeof player.roll === "string" && typeof player.name === "string")) {
-    throw new Error("Unable to read this entry.");
+    throw new UnreadableEntry("Saved entry data cannot be read.");
   }
   return entry;
 }
@@ -59,11 +66,27 @@ function fixtureNotice(entry) {
 }
 
 export function renderEntries(main, id, updated = false) {
-  const entries = sports.flatMap(sport => sport.categories.map(category => findEntry(sport, category))).filter(Boolean);
+  const entries = [];
+  const unreadable = [];
+  for (const sport of sports) {
+    for (const category of sport.categories) {
+      try {
+        const entry = findEntry(sport, category);
+        if (entry) entries.push(entry);
+      } catch (error) {
+        if (!(error instanceof UnreadableEntry)) throw error;
+        unreadable.push(`${sport.name} · ${category.name}`);
+      }
+    }
+  }
+  const warning = unreadable.length ? `<div class="panel panel-message local-note">
+    <strong>Some saved entries could not be read.</strong>
+    <p>Affected categories: ${unreadable.join(", ")}. Contact the Student Centre if you need help verifying one of these entries.</p></div>` : "";
   document.title = (id ? "Entry receipt" : "My Entries") + " · UniSports";
   if (!id) {
     main.innerHTML = `<div class="page-heading"><h1 tabindex="-1">My Entries</h1></div>
       <p class="local-note">Your entries on this browser. Clearing site data removes your saved registrations.</p>
+      ${warning}
       ${entries.length ? '<ul class="board-list panel entries-list">' + entries.map(entry => {
         const sport = getSport(entry.sport);
         const category = getCategory(sport, entry.category);
@@ -75,7 +98,8 @@ export function renderEntries(main, id, updated = false) {
   }
   const entry = entries.find(record => record.id === id);
   if (!entry) {
-    main.innerHTML = '<h1 tabindex="-1">Entry unavailable</h1><p>This reference is unavailable on this browser.</p><a class="back-link" href="#/entries">My Entries</a>';
+    main.innerHTML = `<h1 tabindex="-1">Entry unavailable</h1><p>This reference is unavailable on this browser.</p>
+      ${warning}<a class="back-link" href="#/entries">My Entries</a>`;
     return;
   }
   const sport = getSport(entry.sport);
@@ -98,6 +122,6 @@ export function renderEntries(main, id, updated = false) {
       <strong>${escapeText(p.name)}${category.kind === "team" && !i ? " · Captain" : ""}</strong>
       <span>${escapeText(p.roll)}</span></div></li>`).join("")}</ul>
     ${editable ? `<div class="entry-actions"><a class="primary-action" href="#/register/${event}/edit-roster">Edit roster</a></div>` :
-      `<p class="panel-message">${verified ? "This entry is confirmed. " : !isOpen(sport) ? "Registration has closed. " : ""}Contact the Student Centre for corrections.</p>`}
+      `<p class="panel-message">${!isOpen(sport) && !verified ? "Registration has closed. " : ""}For corrections, give the Student Centre your entry reference <strong>${escapeText(entry.id)}</strong> and the details to correct.</p>`}
     </section></div>`;
 }
