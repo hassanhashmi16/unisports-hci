@@ -1,12 +1,12 @@
 # UniSports MVP plan
 
-**Draft for project review · FAST-NUCES Lahore · Frontend prototype**
+**Implementation plan · FAST-NUCES Lahore · Frontend prototype**
 
 UniSports should let a student answer three questions in one place. *Can I enter this tournament? Did my entry go through, and what do I do next? When and where is the match now?* A spectator should be able to answer the last question from a phone without registering. These outcomes determine what earns a place in the MVP.
 
 ## 1. Scope and evidence
 
-The MVP covers **one campus, one season and seven sports and games**. Football, cricket and volleyball share the captain-led team flow. Badminton and table tennis each offer men’s singles, women’s singles, men’s doubles and women’s doubles. For planning, mixed doubles appears under badminton only, pending confirmation. Ludo and chess offer solo entry only and reuse the individual registration form. All seven use the same tournament and match pages.
+The MVP covers **one campus, one season and seven sports and games**. Football, cricket and volleyball share the captain-led team flow. Badminton and table tennis each offer men’s singles, women’s singles, men’s doubles and women’s doubles. Include mixed doubles for badminton only in this edition. Ludo and chess offer solo entry only and reuse the individual registration form. All seven use the same tournament and match pages. The expanded lineup is the team's decision after the three-sport proposal. The original discovery, registration and match-finding tasks still define the scope.
 
 | User and context | Research evidence | MVP priority |
 | --- | --- | --- |
@@ -34,12 +34,31 @@ Use three main destinations, **Tournaments**, **Fixtures & Results** and **My En
 
 The individual, pair and team forms are variants of page 3. The receipt and returning status view share page 5. Upcoming, Results and the tournament bracket are views within existing pages. This keeps the navigation small while giving every task an identifiable destination.
 
+```mermaid
+flowchart LR
+    Home[Tournaments] --> Event[Tournament details]
+    Event -->|Open category| Form[Registration details]
+    Form -->|Valid entry| Review[Review entry]
+    Review -->|Edit| Form
+    Review -->|Submit or save changes| Receipt[Entry status and receipt]
+    Receipt --> Entries[My Entries]
+    Entries --> Receipt
+    Receipt -->|Eligible roster correction| Form
+    Home --> Fixtures[Fixtures & Results]
+    Event -->|This tournament| Fixtures
+    Fixtures --> Match[Match details]
+    Event -->|Bracket fixture| Match
+    Entries -->|Assigned match| Match
+    Match -->|Tournament bracket| Event
+```
+
 ### 1. Tournaments
 
 - Open on the current campus season. List each available tournament with its sport and category, entry type, eligibility summary, registration deadline and open or closed status.
-- Let students narrow the list by sport and inspect the eligibility summary before opening an event. Use the university's verified eligibility categories if available. Avoid inferring personal eligibility from a roll number.
+- On mobile, lead with open tournaments ordered by the nearest registration deadline. Follow with today’s fixtures, or the next scheduled fixtures when none are due today. Once all registrations close, lead with fixtures. Keep **Fixtures & Results** one tap away in the same navigation position throughout the season. When a match changes, show the revised time or venue beside the affected fixture and link to its match details.
+- Let students narrow the list by sport and category, including men's, women's, mixed and open events. Show the campus eligibility summary before they open an event. A student chooses which categories to browse. A roll number identifies an entry and does not determine category eligibility.
 - Open a tournament by name. Returning from its details restores the selected sport. A closed tournament remains discoverable because its fixtures can still matter.
-- If a selection has no events, explain the empty result and offer **Show all sports**. The public fixture destination stays available even when registration has ended.
+- If a selection has no events, explain the empty result and offer **Clear filters**. The public fixture destination stays available even when registration has ended.
 
 ### 2. Tournament details
 
@@ -97,12 +116,45 @@ The individual, pair and team forms are variants of page 3. The receipt and retu
 | Tournament | Owns the sport, category, published entry rules, deadline, fee basis, format, venue and registration window. All pages read the same event information. |
 | Entry | Belongs to a specific tournament and event category. The example student can submit several entries in one season. Each submitted entry has its own reference and verification status in My Entries. A form stays a draft until submitted. A separately prepared record demonstrates confirmation. |
 | Match | Owns participants, round, latest schedule, any prior schedule, update time, status and result. Fixtures, bracket and My Entries refer to that same match so a venue change cannot disagree across pages. |
-| Demo storage | Proposed coded version uses fictional records and browser-local storage for submitted entries. Refresh restores a submitted entry. If saving fails, keep the form data available for retry and withhold the receipt until the save succeeds. A prototype notice tells testers to enter fictional details. |
-| Season examples | Include open singles, doubles and team events, a closed event, a pending and a confirmed entry, an assigned match and an entry awaiting a fixture. Include scheduled, delayed, rescheduled and completed matches, plus an unaffected fixture. Choose a fixed, disclosed demo date within the sample season so deadlines and “upcoming” remain coherent during the presentation. |
+| Demo storage | Use fictional records and browser-local storage for submitted entries. Refresh restores a submitted entry. If saving fails, keep form data available for retry and show the receipt only after the save succeeds. Give testers fictional details in their task brief. Explain device-local storage in My Entries. |
+| Season clock | Use 2 December 2026 at noon, Lahore time, for the presentation. Show the board date above the fixtures. Compare all deadlines, match times and change notices against that same clock. Use a later clock in QA to check closed registration and the fixture-first homepage. |
 
-**Scope boundary.** Public schedules and entry-specific change notices represent the student-facing part of Phase 2's update scenario. Following sports, outbound notifications, messaging and organizer editing are deferred. Sharing uses an ordinary public link. Real authentication, payments, online ID checks, automated draws, live scoring, recruitment and full student profiles are outside the proposal's MVP. Proposed implementation, if approved, is plain HTML, CSS and JavaScript with mock data. [Phase 1 proposal](UniSports_Sample_Proposal.docx)
+**Scope boundary.** Public schedules and entry-specific change notices represent the student-facing part of Phase 2's update scenario. Following sports, outbound notifications, messaging and organizer editing are deferred. Sharing uses an ordinary public link. Real authentication, payments, online ID checks, automated draws, live scoring, recruitment and full student profiles are outside the proposal's MVP. The frontend will use plain HTML, CSS and JavaScript with mock data. [Phase 1 proposal](UniSports_Sample_Proposal.docx)
 
-**Decisions before implementation.** Verify the working assumption about mixed doubles. Set the applicable eligibility rules, roster limits, playing-captain rule, deadlines, venues and any additional Student Centre instructions. The plan assumes one demo entry per student within the same tournament category. Theme and visual direction remain yours to choose.
+
+### Event rules and season content
+
+The fees, roster limits, dates, venue labels and match records below are production decisions for the classroom prototype. The survey establishes the need to publish these details. It does not establish official FAST regulations.
+
+| Tournament | Entry rule for this edition | Registration closes (Lahore time) | Venue shown in the draw |
+| --- | --- | --- | --- |
+| Football | Open five-a-side, 5–8 players per squad | 3 Dec, 4 PM | Football Ground |
+| Cricket | Open six-a-side, 6–9 players per squad | 4 Dec, 4 PM | Cricket Ground |
+| Volleyball | Open six-a-side, 6–9 players per squad | 30 Nov, 4 PM | Volleyball Courts |
+| Badminton | Men's and women's singles and doubles, plus mixed doubles | 3 Dec, noon | Indoor Hall, Badminton Courts |
+| Table tennis | Men's and women's singles and doubles | 4 Dec, noon | Indoor Hall, Table Tennis Area |
+| Chess | Open individual entry | 1 Dec, 4 PM | Activity Room |
+| Ludo | Open individual entry | 3 Dec, 2 PM | Student Centre, Games Room |
+
+Use currently enrolled FAST Lahore students as the participant group. Captains play and count once toward the squad limit. Store the captain as the first roster member and prefill their details. Either partner can register a doubles pair. For mixed doubles, publish the one-man, one-woman rule with the category description. Use self-selection at entry and office verification. Spectating is public. Accept roll numbers such as `24L-0123`, trim spaces and normalize letter case before comparing IDs. Within the available local entries, a student can appear once in a given category and can enter other categories. Identify a duplicate at the relevant player and never reveal another entry's private roster.
+
+Use one two-sided knockout draw per category. For this edition Ludo uses head-to-head games. Each completed fixture records an advancing side. A chess draw awaiting a tiebreak keeps the advancing slot undecided. Only published outcomes populate later rounds. Open categories can show **Draw will appear after registration closes**. Newly submitted teams stay pending and unassigned. Link assigned matches using entry and competitor identifiers so a similar team name cannot attach the wrong fixture.
+
+**One connected demonstration.** On 2 December the open-event list starts with badminton, which closes at noon the next day. A student submits a badminton pair, gets one reference and sees the Rs 400 payment instruction. A separate confirmed volleyball entry belongs to *Falcons*. Its semifinal against *Rovers* moved from 3 PM on Court 1 to **4:30 PM on Court 2**. Publish the change at 11:15 AM on the board date. The fixture list, receipt link, bracket and My Entries must all lead to that match. Include a completed chess quarterfinal with a recorded winner, an unaffected scheduled volleyball semifinal and a delayed fixture awaiting a time. This gives the presenter credible tasks even with the network disconnected after loading the local app.
+
+### Screen presentation
+
+**Visual direction.** Give the Tournaments home page the feel of a campus fixture board. Under a compact navy header, use the opening space for deadlines, match times and venues. Keep these details near the top on mobile. Use off-white page backgrounds, dark text and cobalt primary actions for fixtures, registration and My Entries. Starting colors are navy `#101A2B`, off-white `#F5F7FA`, text `#172437`, and cobalt `#1D4ED8`. Use the same labels and control patterns across pages. Display statuses such as **Rescheduled** and **Pending verification** in words, with color as reinforcement. This applies Norman's visibility and consistency and the course guidance on readable contrast and decoration. Check status colors, keyboard focus and text contrast in the wireframes and final screens.
+
+**Brand identity.** Use UniSports as the product name and primary brand. Show **FAST Lahore** as the campus identifier so students can tell which tournaments the portal covers.
+
+**First screen.** On a phone, show the three named destinations, then **Open for registration**. Group open categories under their sport so nine racket categories do not bury the other games. Give each sport row its earliest available deadline, fee basis and a link to its categories. Follow with **Today's fixtures**. On a laptop show those two sections side by side. Give the revised time the strongest emphasis inside a changed fixture. The original time belongs in Match details. Every homepage row opens an event or match. The board date, deadlines and team names supply the copy.
+
+**Type and controls.** Use Barlow for headings and a system sans serif for form text and schedule rows. Start body text at 16 CSS pixels and align times with tabular numerals. Stack each player’s labelled fields on a narrow phone. Keep one horizontal row per player when space permits. Keep all three navigation labels visible on both sizes. Use native links, buttons and inputs. Aim for 44 by 44 CSS pixels for touch actions, include a visible keyboard focus outline, check at 320 CSS pixels and at 200% zoom, and ensure ordinary text reaches a 4.5 to 1 contrast ratio. Use inline status changes and preserve focus during updates.
+
+**Registration progress and recovery.** Show **1 Details → 2 Review → 3 Receipt** with the current step announced to assistive technology. Use **Discard changes?** only when leaving a changed form. Return focus to the triggering control after cancelling the dialog. A duplicate ID produces field-level guidance such as **This roll number is already listed for player 2**. During a save, guard against double submission. On success, focus the receipt heading. On failure, keep the draft and offer **Try again**. These states supply the handout's progress indicator, dialog and message box within a real task.
+
+**Implementation.** Serve static HTML, CSS and JavaScript from a local web server. Use one small shared navigation shell and hash links for public tournament and match destinations. Encode filters in the fixture URL so Back, refresh and copied links preserve the intended view. Put tournament categories, deadlines, fee rules, competitors and fixture records in one local data module. Use the same formatting and status logic on every screen. Keep only fictional submitted records in versioned local storage and keep roll numbers out of URLs. Offer an empty-state fixture for testing and seed the presentation with the confirmed entry described above.
 
 ## 4. How the plan applies the HCI course
 
@@ -149,11 +201,30 @@ Suggested targets are at least 80% unaided completion for each task attempted by
 
 **Delivery sequence**
 
-1. Agree on this scope and the sample campus rules. Choose the visual direction separately before high-fidelity work.
-2. Sketch the eight screen purposes and walk through the three persona journeys. Compare alternative ways to correct a roster and find a changed fixture. Keep the chosen wireframes and the reasoning for revisions.
+1. Start the wireframes with the sport and category rules above. Storyboard three moments from Phase 2: Ayesha deciding whether to pay, Hamza correcting a roster and Sana finding the revised venue. Give each frame a user goal, action and visible response.
+2. Sketch the eight screens and their exceptional states. Compare a separate whole-roster editing screen with direct access to a named player from review. Compare a general changes feed with placing the revision on the affected fixture. Start with the named-player link and inline change. Test whether students can find both, and keep the alternate sketches and the reason for the final choice.
 3. Connect discovery and public fixtures first. Then connect the individual, pair and team registration variants, review, receipt and My Entries. Use the same sample matches in the bracket and the change notices.
 4. Walk through the normal and exceptional paths on phone and laptop, including keyboard-only use, closed registration, a duplicate player, back/edit, empty filters, delay without a replacement time, refresh after submission and an unavailable match link.
 5. Run the student tasks and inspect all ten Nielsen heuristics using the course workbook. Record evaluator, task, screen and step, observation, impact, recommended change and retest. Keep participant findings separate from inspection findings. For the proposal's predictive evaluation, model the registration goal with GOMS and use KLM to compare two methods for one familiar action, such as correcting a player's roll number.
 6. Assemble the high-fidelity frontend, wireframe-to-final examples, completed evaluation workbook and revision evidence. The Phase 4 rubric allocates **5/20** to high-fidelity design, **4/20** to navigation and interaction, **3/20** to content and principles, and **8/20** to the workbook. [Course evaluation reference](skills/applied-hci/references/project-evaluation.md) · [Phase 4 handout](Course%20Materials/Project%20Phase%204.pdf) · [Heuristic evaluation workbook](Course%20Materials/Heuristic_Evaluation.pdf)
 
 The MVP is ready to present when each persona can complete the relevant journey, the same entry or match gives the same answer everywhere it appears, and the group can show what changed in response to evaluation.
+
+### Inspection and hand-in
+
+Use these as inspection prompts when the frontend exists. Enter actual observations in the supplied workbook. Record the starting screen, action, evidence, impact, recommended correction and retest outcome. An inspected screen that passes can be recorded as such.
+
+| Nielsen heuristic | What the evaluator actually tries |
+| --- | --- |
+| Visibility of system status | Submit the badminton pair. Ask what the reference proves and what still needs to happen. |
+| Match with the real world | Find the Student Centre payment instruction and determine whether Rs 400 covers one or both players. |
+| User control and freedom | Remove a teammate, undo it, then cancel a different edit. Reopen the original roster. |
+| Consistency and standards | Compare the Falcons match time and venue on the public board, the bracket link and the captain's entry. |
+| Error prevention | Enter the captain twice using different letter case. Try submitting an otherwise valid roster after the deadline. |
+| Recognition over recall | Return directly to player three from review. Check that the other players and selected event remain visible or retrievable. |
+| Flexibility and efficiency | Open a shared match link on a phone. On a laptop, complete a roster correction by keyboard. |
+| Aesthetic and minimalist design | At phone width, identify the next deadline and the path to today's fixtures. Flag any element that delays either task. |
+| Error recognition and recovery | Trigger a failed save. Check that the message gives an action, that retry preserves the draft and that only one receipt exists. |
+| Help and documentation | From a confirmed receipt, find the office correction instructions at the point where a captain would look for Edit roster. |
+
+For each substantive revision keep one wireframe or before-screen, the finding that motivated the edit, the revised screen and a retest note. For the **5 design marks**, use these pairs to show typography, layout and color at phone and laptop widths. For the **4 navigation marks**, walk through the progress indicator, discard dialog and error recovery. For the **3 principles marks**, demonstrate the roster edit and pending receipt and explain the user's action and expected feedback. For the **8 workbook marks**, submit the completed official workbook with precise findings under all ten headings. The instructor allowed the HTML/CSS/JS frontend as the high-fidelity medium. Capture representative screens from that same build for the submission.
