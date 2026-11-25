@@ -38,6 +38,8 @@ The estimated difference is **1.30 s** for the additional point and click. It ex
 
 ## Participant walkthrough
 
+The task cards, facilitator scoring guide and blank observation sheet are ready for the student sessions. [Student study materials](student-study/facilitator-guide.md)
+
 Recruit approximately five students and cover individual or pair entrants, captains and spectators. Give participants fictional details and reset the browser state between sessions. Ask them to think aloud, record hesitation and assistance, and use time only as a rough comparison under that instruction.
 
 | Starting screen | Prompt and success evidence |
