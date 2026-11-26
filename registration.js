@@ -2,6 +2,8 @@ import { fees, isOpen } from "./data.js";
 import { shortDate, timeLabel, escapeText } from "./ui.js";
 import { canEditRoster, findEntry, saveEntry } from "./entries.js";
 
+import { sportMark } from "./graphics.js";
+
 // Drafts belong to this tab and event. Only a later submission creates an entry.
 const drafts = new Map();
 const blankPlayer = () => ({ name: "", roll: "" });
@@ -99,7 +101,7 @@ export function renderRegistration(main, sport, category, step, query, editing =
   if (step === "review" && !reviewing) history.replaceState(null, "", base);
   document.title = `${reviewing ? "Review entry" : "Registration"} · ${sport.name} · UniSports`;
   const summary = `<aside class="panel entry-summary" aria-label="Event information">
-    <header class="panel-heading"><h2>${sport.name}</h2><p>${category.name}</p></header>
+    <header class="panel-heading summary-heading">${sportMark(sport)}<div><h2>${sport.name}</h2><p>${category.name}</p></div></header>
     <dl class="detail-list">
       <div><dt>Entry fee</dt><dd><strong>${fee.amount} ${fee.unit}</strong></dd></div>
       ${category.eligibility === "mixed" ? "<div><dt>Pair eligibility</dt><dd>One man and one woman, both enrolled at FAST Lahore.</dd></div>" : ""}
@@ -111,7 +113,7 @@ export function renderRegistration(main, sport, category, step, query, editing =
       <span>${sport.name} · ${category.name}</span></div>
     <ol class="entry-progress" aria-label="Registration progress">
       ${["Details", "Review", "Receipt"].map((name, i) => `<li ${i === Number(reviewing) ? 'aria-current="step"' : ""}>${i + 1}. ${name}</li>`).join("")}
-    </ol><div class="entry-layout">${summary}<section class="panel entry-body"></section></div>`;
+    </ol><div class="entry-layout"><section class="panel entry-body"></section>${summary}</div>`;
   const body = main.querySelector(".entry-body");
   if (reviewing) {
     body.innerHTML = `<header class="panel-heading"><h2>${team ? "Team entry" : kind === "pair" ? "Pair entry" : "Individual entry"}</h2>
@@ -123,6 +125,7 @@ export function renderRegistration(main, sport, category, step, query, editing =
         <span>${escapeText(player.roll.trim().toUpperCase())}</span></div>
         <a href="${base}?edit=roll-${index}" aria-label="Edit details for ${escapeText(player.name.trim())}">Edit details</a>
       </div>`).join("")}
+      ${!editing ? `<p class="review-fee"><strong>${fee.amount} ${fee.unit}</strong> · Pay at the Student Centre</p>` : ""}
       <div class="entry-actions"><button type="button" class="primary-action" id="save-entry">${editing ? "Save changes" : "Submit entry"}</button>
       ${editing ? '<button type="button" class="text-button" id="discard-entry">Cancel changes</button>' : ""}
       <span role="status" id="save-status"></span></div>`;

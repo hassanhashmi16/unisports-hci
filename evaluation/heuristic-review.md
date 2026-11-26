@@ -52,3 +52,13 @@ Recruit approximately five students and cover individual or pair entrants, capta
 | My Entries with the confirmed Falcons entry | Find the changed fixture. Ask which court another semifinal uses and where to request a roster correction. |
 
 For each task, log attempt number, device, success, time, errors, assistance and a 1–5 confidence rating with the participant's reason. Use the planned target of four unaided successes out of five attempts where five complete the task. Report numerator and denominator for smaller groups. Participant results, confidence ratings and observed timings should be entered after the sessions.
+
+## Campus programme redesign
+
+| Student task | Design decision and course principle | Screens |
+| --- | --- | --- |
+| Find the next registration deadline between classes | The homepage ticket names the sport, gives the deadline and opens that event. All three destinations remain visible on a phone. This applies Norman’s visibility and mapping. | [Desktop board](evidence/programme-desktop.png) · [Phone board](evidence/programme-phone.png) |
+| Find the revised Falcons semifinal | The current time and court form the first pair of match facts. The earlier arrangement appears below under “Previously scheduled.” This groups the information the spectator needs to act. | [Earlier match page](evidence/rescheduled-match.png) · [Revised match page](evidence/programme-match.png) |
+| Work out what to do after submitting a pair | The current progress step, pending status, reference and fee instruction appear together. The student can take the receipt to the Student Centre. This supplies feedback and closure while supporting recognition. | [Earlier receipt](evidence/pending-pair.png) · [Revised phone receipt](evidence/programme-receipt.png) |
+
+Browser walkthroughs passed at 320, 390, 768 and 1366 CSS pixels. They exercised solo, pair and team submission, keyboard validation and edit focus, roster removal and undo, saved roster correction, receipts after refresh, schedule filters, delayed and revised matches, bracket navigation and the closed-registration board. The four widths also passed horizontal overflow checks on the tested screens. Student comprehension and unaided task success remain questions for the participant sessions.

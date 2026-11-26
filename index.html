@@ -3,8 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101a2b">
+  <meta name="theme-color" content="#233bad">
   <title>UniSports · FAST Lahore</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/unisports.svg">
+  <link rel="preload" href="./assets/fonts/bricolage-grotesque.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.js"></script>
 </head>
@@ -13,18 +15,19 @@
   <header class="site-header">
     <div class="header-inner">
       <a class="brand" href="#/">
-        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span><strong>UniSports</strong><small>FAST Lahore</small></span>
+        <img src="./assets/unisports.svg" alt="" width="34" height="34">
+        <strong>UniSports</strong>
       </a>
       <nav class="primary-nav" aria-label="Main navigation">
         <a href="#/" aria-current="true">Tournaments</a>
         <a href="#/fixtures">Fixtures &amp; Results</a>
         <a href="#/entries">My Entries</a>
       </nav>
+      <span class="campus"><i aria-hidden="true"></i> FAST Lahore</span>
     </div>
   </header>
   <main id="content" class="shell" tabindex="-1"></main>
-  <footer class="site-footer"><div class="shell">UniSports <span>·</span> FAST Lahore <span>·</span> Classroom prototype</div></footer>
+  <footer class="site-footer"><div class="shell"><strong>UniSports</strong><span>FAST Lahore · Classroom prototype</span></div></footer>
   <noscript><p class="shell">Enable JavaScript to browse tournaments and fixtures.</p></noscript>
 </body>
 </html>

@@ -1,6 +1,8 @@
 import { confirmedEntry, fees, getCategory, getMatch, getSport, isOpen, sports } from "./data.js";
 import { escapeText, timeLabel, shortDate } from "./ui.js";
 
+import { icon, sportMark } from "./graphics.js";
+
 const prefix = "unisports.entries.v1/";
 const pending = "Pending verification";
 const storageKey = (sport, category) => prefix + sport.id + "/" + category.id;
@@ -64,8 +66,9 @@ function fixtureNotice(entry) {
   const changed = match.status === "Rescheduled";
   const when = match.status === "Delayed" ? "Revised time pending" :
     shortDate.format(new Date(match.when)) + ", " + timeLabel(match.when);
-  return `<p><a class="back-link" href="#/matches/${match.id}">${match.sides.join(" vs ")}</a>
-    · ${match.status} · ${when} · ${changed ? "Current venue: " : ""}${match.venue}</p>`;
+  return `<div class="linked-match"><div><a class="back-link" href="#/matches/${match.id}">${match.sides.join(" vs ")}</a>
+    <span class="status ${match.status.toLowerCase()}">${match.status}</span></div>
+    <p>${icon("clock")} ${when}</p><p>${icon("pin")} ${changed ? "Current venue: " : ""}${match.venue}</p></div>`;
 }
 
 export function renderEntries(main, id, updated = false) {
@@ -88,14 +91,16 @@ export function renderEntries(main, id, updated = false) {
   document.title = (id ? "Entry receipt" : "My Entries") + " · UniSports";
   if (!id) {
     main.innerHTML = `<div class="page-heading"><h1 tabindex="-1">My Entries</h1></div>
-      <p class="local-note">Your entries on this browser. Clearing site data removes your saved registrations.</p>
+      <p class="local-note">${icon("ticket")} Your entries on this browser. Clearing site data removes your saved registrations.</p>
       ${warning}
-      ${entries.length ? '<ul class="board-list panel entries-list">' + entries.map(entry => {
+      ${entries.length ? '<ul class="board-list entries-list">' + entries.map(entry => {
         const sport = getSport(entry.sport);
         const category = getCategory(sport, entry.category);
         const participant = entry.team || entry.players.map(player => player.name).join(" & ");
-        return `<li><a class="receipt-link" href="${receiptLink(entry)}">${sport.name} · ${category.name}</a>
-          <p>${escapeText(participant)} · <strong>${entry.status}</strong></p>${fixtureNotice(entry)}</li>`;
+        return `<li class="panel saved-entry"><div class="entry-card-head">${sportMark(sport)}
+          <div><a class="receipt-link" href="${receiptLink(entry)}">${sport.name} · ${category.name} ${icon("arrow")}</a>
+          <p>${escapeText(participant)}</p></div><span class="status ${entry.status === "Confirmed" ? "open" : "delayed"}">${entry.status}</span></div>
+          <div class="entry-match"><h3>Your match</h3>${fixtureNotice(entry)}</div></li>`;
       }).join("") + "</ul>" : '<p>No entries yet. <a href="#/">Browse tournaments</a></p>'}`;
     return;
   }
@@ -114,8 +119,10 @@ export function renderEntries(main, id, updated = false) {
     <div class="page-heading"><h1 tabindex="-1">${verified ? "Entry confirmed" : "Entry received"}</h1>
       <span class="status ${verified ? "open" : "delayed"}">${entry.status}</span></div>
     <ol class="entry-progress" aria-label="Registration progress"><li>1. Details</li><li>2. Review</li><li aria-current="step">3. Receipt</li></ol>
-    <p class="local-note">${updated ? "Roster updated. " : ""}Entry reference <strong>${escapeText(entry.id)}</strong></p>
-    <div class="detail-grid"><section class="panel"><header class="panel-heading"><h2>${sport.name} · ${category.name}</h2></header>
+    ${updated ? '<p class="local-note" role="status">Roster updated.</p>' : ""}
+    <div class="detail-grid receipt-layout"><section class="panel receipt"><header class="receipt-head">
+    <span class="ticket-label">${icon("ticket")} Entry reference</span><strong>${escapeText(entry.id)}</strong>
+    <h2>${sport.name} · ${category.name}</h2></header>
     <div class="panel-message">${verified ? "The Student Centre has verified your entry." :
       `If you haven’t paid yet, take your reference to the Student Centre and pay ${fees[category.kind].instruction}. The office confirms your entry after verification.`}
     </div><div class="share"><a class="back-link" href="#/tournaments/${event}">Tournament details</a></div>

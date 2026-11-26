@@ -7,6 +7,8 @@ import { registerLabel, renderRegistration } from "./registration.js";
 import { findEntry, renderEntries } from "./entries.js";
 import { enableSharing, href, longDate, shareControl, shortDate, timeLabel } from "./ui.js";
 
+import { icon, sportMark } from "./graphics.js";
+
 const main = document.querySelector("main");
 const eligibilityOptions = [
   ["open", "Open"], ["men", "Men’s"], ["women", "Women’s"], ["mixed", "Mixed"],
@@ -40,6 +42,7 @@ function tournamentList(tournaments, filters) {
 
       return `<li>
         <a class="tournament-row" href="${href(eventPath(sport, category), filters)}">
+          ${sportMark(sport)}
           <span class="row-title">
             <strong>${sport.name}</strong>
             <span>${categories.length === 1 ? categories[0].name : `${categories.length} categories`}</span>
@@ -48,6 +51,7 @@ function tournamentList(tournaments, filters) {
             <time datetime="${sport.closes}">${isOpen(sport) ? "Closes" : "Closed"} ${deadline(sport)}</time>
             <span>${feeLabels.join(" · ")}</span>
           </span>
+          <span class="row-arrow">${icon("arrow")}</span>
         </a>
       </li>`;
     }).join("")}
@@ -64,11 +68,12 @@ function fixtureBoard() {
   return `<section class="fixture-board panel" aria-labelledby="fixture-heading">
     <header class="panel-heading">
       <h2 id="fixture-heading">${today.length ? "Today’s fixtures" : "Upcoming fixtures"}</h2>
-      <p>Times in Lahore</p>
+      <p>${icon("clock")} Lahore time</p>
     </header>
     ${fixtures.length ? `<ul class="board-list">
       ${fixtures.map(match => matchRow(match, null, !today.length)).join("")}
     </ul>` : '<p class="panel-message">No upcoming fixtures have been published.</p>'}
+    <a class="panel-foot" href="#/fixtures">View full schedule ${icon("arrow")}</a>
   </section>`;
 }
 
@@ -86,7 +91,7 @@ function renderBoard(filters) {
   const open = tournamentGroups.filter(({ sport }) => isOpen(sport));
   const closed = tournamentGroups.filter(({ sport }) => !isOpen(sport));
   const seasonOpen = sports.some(isOpen);
-  const openPanel = `<section class="panel" aria-labelledby="open-heading">
+  const openPanel = `<section class="panel directory" aria-labelledby="open-heading">
     <header class="panel-heading">
       <h2 id="open-heading">Open for registration</h2>
       <p>${open.length ? "Nearest deadline first" : "Registration dates in Lahore time"}</p>
@@ -103,7 +108,7 @@ function renderBoard(filters) {
   </section>`;
   document.querySelector("#board").innerHTML = `${seasonOpen ? (tournamentGroups.length ? openPanel : emptyPanel) : ""}
     ${fixtureBoard()}
-    ${closed.length ? `<section class="panel" aria-labelledby="closed-heading">
+    ${closed.length ? `<section class="panel directory" aria-labelledby="closed-heading">
       <header class="panel-heading"><h2 id="closed-heading">Registration closed</h2></header>
       ${tournamentList(closed, filters)}
     </section>` : ""}
@@ -111,10 +116,16 @@ function renderBoard(filters) {
 }
 
 function renderHome(filters) {
-  main.innerHTML = `<div class="page-heading">
-    <h1 tabindex="-1">Campus tournaments</h1>
-    <time datetime="${dayOf(clock)}">${longDate.format(clock)}</time>
-  </div>
+  const next = sports.filter(isOpen).sort((a, b) => new Date(a.closes) - new Date(b.closes))[0];
+  main.innerHTML = `<header class="programme">
+    <div class="programme-title"><time class="dateline" datetime="${dayOf(clock)}">${icon("calendar")}${longDate.format(clock)}</time>
+      <h1 tabindex="-1">Campus <span>tournaments</span></h1></div>
+    <div class="lanes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    ${next ? `<a class="deadline-ticket" href="${href(eventPath(next))}"><span class="ticket-label">${icon("clock")} Next deadline</span>
+      <strong>${next.name}</strong><span class="ticket-stub">${deadline(next)} ${icon("arrow")}</span></a>` :
+      `<a class="deadline-ticket" href="#/fixtures"><span class="ticket-label">${icon("calendar")} Match schedule</span>
+      <strong>Fixtures</strong><span class="ticket-stub">View matches ${icon("arrow")}</span></a>`}
+  </header>
   <form class="filters" aria-label="Tournament filters">
     <label>Sport
       <select name="sport">
@@ -165,10 +176,10 @@ function renderTournament(sport, category, filters) {
   try { entry = findEntry(sport, category); } catch { /* Tournament information is public even if storage is unavailable. */ }
   main.innerHTML = `<a class="back-link" href="${href("/", filters)}">All tournaments</a>
     <div class="page-heading detail-heading">
-      <h1 tabindex="-1">${sport.name}</h1>
+      <div class="event-name">${sportMark(sport)}<h1 tabindex="-1">${sport.name}</h1></div>
       <span class="status ${open ? "open" : "closed"}">${open ? "Registration open" : "Registration closed"}</span>
     </div>
-    <div class="detail-grid">
+    <div class="detail-grid event-layout">
       <section class="panel" aria-labelledby="category-heading">
         <header class="panel-heading"><h2 id="category-heading">Event categories</h2></header>
         <ul class="board-list category-list">
@@ -183,10 +194,12 @@ function renderTournament(sport, category, filters) {
       </section>
       <section class="panel category-details" aria-labelledby="details-heading">
         <header class="panel-heading"><h2 id="details-heading" tabindex="-1">${category.name}</h2></header>
+        <dl class="event-terms">
+          <div><dt>${icon("ticket")} Entry fee</dt><dd><strong>${fees[category.kind].amount}</strong> ${fees[category.kind].unit}</dd></div>
+          <div><dt>${icon("clock")} Registration ${open ? "deadline" : "closed"}</dt><dd><time datetime="${sport.closes}">${deadline(sport)}</time> <small>Lahore time</small></dd></div>
+        </dl>
         <dl class="detail-list">
           <div><dt>Eligibility</dt><dd>${eligibilityRules[category.eligibility]}</dd></div>
-          <div><dt>Registration ${open ? "deadline" : "closed"}</dt><dd><time datetime="${sport.closes}">${deadline(sport)} Lahore time</time></dd></div>
-          <div><dt>Entry fee</dt><dd><strong>${eventFee(category.kind)}</strong></dd></div>
           <div><dt>Entry rules</dt><dd>${entryRule(sport, category)}</dd></div>
           <div><dt>Format</dt><dd>${sport.format || "Knockout"}</dd></div>
           <div><dt>Venue</dt><dd>${sport.venue}</dd></div>

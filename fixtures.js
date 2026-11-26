@@ -1,6 +1,8 @@
 import { clock, dayOf, getCategory, getSport, matches, sports } from "./data.js";
 import { enableSharing, href, longDate, shareControl, shortDate, timeLabel } from "./ui.js";
 
+import { icon, sportMark } from "./graphics.js";
+
 const byStart = (a, b) => Date.parse(a.when) - Date.parse(b.when);
 const isPending = match => match.status === "Delayed";
 const labelDate = date => longDate.format(new Date(date));
@@ -13,9 +15,9 @@ export function matchRow(match, params, includeDate = false) {
   return `<li><a class="fixture-row match-link" href="${href("/matches/" + match.id, params)}">
     <div class="fixture-line"><span>${getSport(match.sport).name} · ${match.round}</span>
     <span class="status ${match.status.toLowerCase()}">${match.status}</span></div>
-    <strong>${match.sides.join(" vs ")}</strong>
-    <div class="fixture-line fixture-time">${timeMarkup}
-    <span>${isPending(match) ? "Original venue: " : ""}${match.venue}</span></div>
+    <strong class="versus-line">${match.sides[0]} <span>vs</span> ${match.sides[1]}</strong>
+    <div class="fixture-line fixture-time"><span class="match-time">${icon("clock")}${timeMarkup}</span>
+    <span>${icon("pin")}${isPending(match) ? "Original venue: " : ""}${match.venue}</span></div>
     ${match.result ? `<span class="outcome">${match.result}</span>` : ""}
   </a></li>`;
 }
@@ -31,13 +33,13 @@ export function scheduleFilters(query) {
 
 export function renderFixtures(main, params) {
   const results = params.get("view") === "results";
-  main.innerHTML = `<div class="page-heading"><h1 tabindex="-1">Fixtures &amp; Results</h1>
-    <time datetime="${dayOf(clock)}">${longDate.format(clock)}</time></div>
+  main.innerHTML = `<div class="page-heading schedule-title"><h1 tabindex="-1">Fixtures <em>&amp;</em> Results</h1>
+    <time class="dateline" datetime="${dayOf(clock)}">${icon("calendar")}${longDate.format(clock)}</time></div>
     <nav class="schedule-views" aria-label="Match lists"></nav>
     <form class="filters schedule-filters" aria-label="Filter matches">
       <label><span id="sport-label">Sport</span><select name="sport" aria-labelledby="sport-label"><option value="">All sports</option>
         ${sports.map(sport => `<option value="${sport.id}">${sport.name}</option>`).join("")}</select></label>
-      <label>Team or player<input type="search" name="q" maxlength="100"></label>
+      <label>Team or player<input type="search" placeholder="Search by name" name="q" maxlength="100"></label>
       <label>Match date<input type="date" name="date"></label>
       <button class="text-button" type="button" id="clear-filters">Clear filters</button>
       <span id="filter-summary" role="status"></span>
@@ -84,8 +86,8 @@ export function renderFixtures(main, params) {
       if (!groups.has(day)) groups.set(day, []);
       groups.get(day).push(match);
     }
-    list.innerHTML = [...groups.values()].map(group => `<section class="panel">
-      <header class="panel-heading"><h2>${labelDate(group[0].when)}</h2><p>Times in Lahore</p></header>
+    list.innerHTML = [...groups.values()].map(group => `<section class="panel day-group">
+      <header class="panel-heading"><h2>${labelDate(group[0].when)}</h2><p>Lahore time</p></header>
       <ul class="board-list">${group.map(match => matchRow(match, filters)).join("")}</ul></section>`).join("");
   }
   form.addEventListener("input", refresh);
@@ -102,9 +104,9 @@ export function bracket(sport, category) {
   return `<section class="panel bracket" aria-labelledby="bracket-title">
     <header class="panel-heading"><h2 id="bracket-title" tabindex="-1">Knockout bracket</h2>
       <p>${sport.name} · ${category.name}</p></header>
-    ${rounds.length ? rounds.map(round => `<section class="round"><h3>${round}</h3>
+    ${rounds.length ? '<div class="rounds">' + rounds.map(round => `<section class="round"><h3>${round}</h3>
       <ul class="board-list">${entries.filter(match => match.round === round)
-        .map(match => matchRow(match, match.result ? new URLSearchParams({ sport: sport.id, view: "results" }) : params, true)).join("")}</ul></section>`).join("") :
+        .map(match => matchRow(match, match.result ? new URLSearchParams({ sport: sport.id, view: "results" }) : params, true)).join("")}</ul></section>`).join("") + "</div>" :
       '<p class="panel-message">The draw has not been published.</p>'}
     <div class="share"><a class="back-link" href="${href("/fixtures", params)}">View fixtures</a></div>
   </section>`;
@@ -116,14 +118,15 @@ export function renderMatch(main, match, params) {
   const event = `/tournaments/${sport.id}/${category.id}`;
   const previous = match.previous ?? (isPending(match) ? match : null);
   main.innerHTML = `<a class="back-link" href="${href("/fixtures", params)}">Fixtures &amp; Results</a>
-    <div class="page-heading detail-heading"><h1 tabindex="-1">${match.sides.join(" vs ")}</h1>
+    <header class="scoreboard"><div class="scoreboard-top"><span>${sportMark(sport)} ${sport.name} · ${category.name}</span>
       <span class="status ${match.status.toLowerCase()}">${match.status}</span></div>
-    <section class="panel"><header class="panel-heading"><h2>${sport.name} · ${match.round}</h2>
-      <p>${category.name}</p></header><dl class="detail-list">
-      ${match.result ? `<div><dt>Result</dt><dd><strong>${match.result}</strong></dd></div>` : ""}
-      <div><dt>${isPending(match) ? "Match time" : "Start time"}</dt><dd><strong>${isPending(match) ? "Revised time pending" : stamp(match.when) + " Lahore time"}</strong></dd></div>
-      ${!isPending(match) ? `<div><dt>Venue</dt><dd>${match.venue}</dd></div>` : ""}
-      ${previous ? `<div><dt>Previously scheduled</dt><dd>${stamp(previous.when)} · ${previous.venue}</dd></div>` : ""}
+      <h1 tabindex="-1"><span>${match.sides[0]}</span> <small>vs</small> <span>${match.sides[1]}</span></h1>
+      <div class="scoreboard-foot">${match.round}</div></header>
+    <section class="panel match-facts"><header class="panel-heading"><h2>Match details</h2></header><dl class="detail-list">
+      ${match.result ? `<div class="result-fact"><dt>Result</dt><dd><strong>${match.result}</strong></dd></div>` : ""}
+      <div class="current-fact"><dt>${icon("clock")} ${isPending(match) ? "Match time" : "Start time"}</dt><dd><strong>${isPending(match) ? "Revised time pending" : stamp(match.when) + " Lahore time"}</strong></dd></div>
+      ${!isPending(match) ? `<div class="current-fact"><dt>${icon("pin")} Venue</dt><dd>${match.venue}</dd></div>` : ""}
+      ${previous ? `<div class="superseded"><dt>Previously scheduled</dt><dd>${stamp(previous.when)} · ${previous.venue}</dd></div>` : ""}
       ${match.updated ? `<div><dt>Update posted</dt><dd>${stamp(match.updated)} Lahore time</dd></div>` : ""}
       </dl><div class="share"><a class="back-link" href="${href(event, new URLSearchParams({ section: "bracket" }))}">View tournament bracket</a></div>
       ${shareControl("match")}</section>`;
