@@ -1,4 +1,4 @@
-import { icon } from "./graphics.js?v=3";
+import { icon } from "./graphics.js?v=6";
 
 const timeZone = "Asia/Karachi";
 export const shortDate = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone });
@@ -89,6 +89,7 @@ export function enhanceSelects(container) {
     root.appendChild(select);
 
     select.classList.add("select-native");
+    select.hidden = true;
     select.tabIndex = -1;
     select.setAttribute("aria-hidden", "true");
 
@@ -135,7 +136,7 @@ export function enhanceSelects(container) {
       return li;
     });
 
-    root.append(trigger, menu);
+    root.append(trigger, menu, select);
 
     let activeIndex = Math.max(0, select.selectedIndex);
 
@@ -197,7 +198,8 @@ export function enhanceSelects(container) {
 
     const api = { root, close };
 
-    trigger.addEventListener("click", () => {
+    trigger.addEventListener("click", event => {
+      event.preventDefault();
       if (menu.hidden) open();
       else closeActiveDropdown(false);
     });
@@ -243,6 +245,8 @@ export function enhanceSelects(container) {
     });
 
     menu.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
       const option = event.target.closest(".select-option");
       if (option) commit(Number(option.dataset.index));
     });

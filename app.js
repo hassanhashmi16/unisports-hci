@@ -1,13 +1,13 @@
 import {
   clock, dayOf, fees, getCategory, getMatch, getSport, isOpen, matches, sports,
-} from "./data.js?v=3";
+} from "./data.js?v=6";
 
-import { bracket, matchRow, renderFixtures, renderMatch, scheduleFilters } from "./fixtures.js?v=3";
-import { registerLabel, renderRegistration } from "./registration.js?v=3";
-import { findEntry, renderEntries } from "./entries.js?v=3";
-import { enableSharing, enhanceSelects, href, longDate, shareControl, shortDate, timeLabel } from "./ui.js?v=3";
+import { bracket, matchRow, renderFixtures, renderMatch, scheduleFilters } from "./fixtures.js?v=6";
+import { registerLabel, renderRegistration } from "./registration.js?v=6";
+import { findEntry, renderEntries } from "./entries.js?v=6";
+import { enableSharing, enhanceSelects, href, longDate, shareControl, shortDate, timeLabel } from "./ui.js?v=6";
 
-import { icon, sportMark } from "./graphics.js?v=3";
+import { icon, sportMark } from "./graphics.js?v=6";
 
 const main = document.querySelector("main");
 const eligibilityOptions = [

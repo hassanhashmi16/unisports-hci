@@ -1,7 +1,7 @@
-import { clock, dayOf, getCategory, getSport, matches, sports } from "./data.js?v=3";
-import { enableSharing, enhanceSelects, href, longDate, shareControl, shortDate, timeLabel } from "./ui.js?v=3";
+import { clock, dayOf, getCategory, getSport, matches, sports } from "./data.js?v=6";
+import { enableSharing, enhanceSelects, href, longDate, shareControl, shortDate, timeLabel } from "./ui.js?v=6";
 
-import { icon, sportMark } from "./graphics.js?v=3";
+import { icon, sportMark } from "./graphics.js?v=6";
 
 const byStart = (a, b) => Date.parse(a.when) - Date.parse(b.when);
 const isPending = match => match.status === "Delayed";
