@@ -1,7 +1,7 @@
-import { clock, dayOf, getCategory, getSport, matches, sports } from "./data.js";
-import { enableSharing, href, longDate, shareControl, shortDate, timeLabel } from "./ui.js";
+import { clock, dayOf, getCategory, getSport, matches, sports } from "./data.js?v=3";
+import { enableSharing, enhanceSelects, href, longDate, shareControl, shortDate, timeLabel } from "./ui.js?v=3";
 
-import { icon, sportMark } from "./graphics.js";
+import { icon, sportMark } from "./graphics.js?v=3";
 
 const byStart = (a, b) => Date.parse(a.when) - Date.parse(b.when);
 const isPending = match => match.status === "Delayed";
@@ -47,6 +47,7 @@ export function renderFixtures(main, params) {
   const form = main.querySelector("form");
   const reset = form.querySelector("button");
   for (const key of ["sport", "q", "date"]) form.elements[key].value = params.get(key) || "";
+  enhanceSelects(form);
 
   function refresh() {
     const filters = new URLSearchParams();

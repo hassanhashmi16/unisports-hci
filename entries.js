@@ -1,7 +1,7 @@
-import { confirmedEntry, fees, getCategory, getMatch, getSport, isOpen, sports } from "./data.js";
-import { escapeText, timeLabel, shortDate } from "./ui.js";
+import { confirmedEntry, fees, getCategory, getMatch, getSport, isOpen, sports } from "./data.js?v=3";
+import { escapeText, timeLabel, shortDate } from "./ui.js?v=3";
 
-import { icon, sportMark } from "./graphics.js";
+import { icon, sportMark } from "./graphics.js?v=3";
 
 const prefix = "unisports.entries.v1/";
 const pending = "Pending verification";

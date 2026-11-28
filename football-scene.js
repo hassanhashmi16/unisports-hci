@@ -1,4 +1,4 @@
-import { drawPortrait } from './football-portrait.js';
+import { drawPortrait } from './football-portrait.js?v=3';
 
 // The actors are drawn with a handful of pressure-sensitive ink strokes.
 // Positions are in metres: x across the pitch, y up, z toward the goal.
@@ -565,7 +565,7 @@ function athlete(ctx,view,feet,pose,role='runner') {
 
   function leg(side) {
     const [,,,thigh,knee,heel] = pose[side];
-    const cuff = between(thigh,knee,.46);
+    const cuff = between(thigh,knee,.70);
     const calf = between(knee,heel,.31);
     const sockTop = between(knee,heel,.23);
     const ankle = between(knee,heel,.91);
@@ -579,10 +579,10 @@ function athlete(ctx,view,feet,pose,role='runner') {
     volume(legShape,fills.skin,.016);
     volume([legShape[3],legShape[4],legShape[5],legShape[6],legShape[7]],fills.sock,0);
     volume([[offset(thigh,0,.082,-.012),.090,.108],[between(thigh,cuff,.40),.104,.115],
-      [between(thigh,cuff,.78),.096,.102],[cuff,.086,.090]],fills.shorts,.014);
+      [between(thigh,cuff,.78),.094,.100],[cuff,.083,.087]],fills.shorts,.014);
     volume([[cleatHeel,.031,.035],[between(heel,toe,.20),.052,.040],
       [between(heel,toe,.68),.051,.028],[toe,.031,.018]],fills.boot,.017);
-    seam(cuff,.076,.085,visibleFace,.009);
+    seam(cuff,.074,.082,visibleFace,.009);
     seam(sockTop,.048,.061,visibleFace,.012);
     const calfHighlight = offset(calf,side*.037,-.006,visibleFace*.052);
     mark([offset(sockTop,side*.033,0,visibleFace*.042),calfHighlight,

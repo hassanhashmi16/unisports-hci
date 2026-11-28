@@ -1,9 +1,10 @@
-import { renderPlay } from './football-scene.js';
+import { renderPlay } from './football-scene.js?v=5';
 
 const story = document.querySelector('[data-story]');
 const canvas = story.querySelector('[data-pitch]');
 const entryChapter = story.querySelector('#enter');
 const fixturesChapter = story.querySelector('#follow');
+const goalChapter = story.querySelector('#goal');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const ctx = canvas.getContext('2d');
 
@@ -26,7 +27,9 @@ function interpolate(value, points, inputColumn = 0) {
   for (let i = 1; i < points.length; i++) {
     const start = points[i-1], end = points[i];
     if (value > end[inputColumn]) continue;
-    const fraction = (value - start[inputColumn]) / (end[inputColumn] - start[inputColumn]);
+    const span = end[inputColumn] - start[inputColumn];
+    if (!span) return end[outputColumn];
+    const fraction = (value - start[inputColumn]) / span;
     return start[outputColumn] + fraction * (end[outputColumn] - start[outputColumn]);
   }
   return points.at(-1)[outputColumn];
@@ -74,7 +77,7 @@ function resize() {
   top = story.getBoundingClientRect().top + scrollY;
   const entry = entryChapter.offsetTop;
   const fixtures = fixturesChapter.offsetTop;
-  const goalScroll = (fixturesChapter.offsetHeight-height)*.71;
+  const followSpan = goalChapter.offsetTop - fixtures;
   beats = [
     [0,0],
     [entry,.28],
@@ -82,12 +85,12 @@ function resize() {
     [fixtures,.69],
     // Spend more scroll travel on the backswing and boot contact, then
     // pick up the pace again as the ball heads toward the keeper.
-    [fixtures+goalScroll*.055,.708],
-    [fixtures+goalScroll*.14,.725],
-    [fixtures+goalScroll*.34,.75],
-    [fixtures+goalScroll*.575,.778],
-    [fixtures+goalScroll*.69,.804],
-    [fixtures+goalScroll,.93],
+    [fixtures+followSpan*.055,.708],
+    [fixtures+followSpan*.14,.725],
+    [fixtures+followSpan*.34,.75],
+    [fixtures+followSpan*.575,.778],
+    [fixtures+followSpan*.69,.804],
+    [goalChapter.offsetTop,.92],
     [story.offsetHeight-height,1],
   ];
   progress = target = position();

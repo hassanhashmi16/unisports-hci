@@ -1,13 +1,13 @@
 import {
   clock, dayOf, fees, getCategory, getMatch, getSport, isOpen, matches, sports,
-} from "./data.js";
+} from "./data.js?v=3";
 
-import { bracket, matchRow, renderFixtures, renderMatch, scheduleFilters } from "./fixtures.js";
-import { registerLabel, renderRegistration } from "./registration.js";
-import { findEntry, renderEntries } from "./entries.js";
-import { enableSharing, href, longDate, shareControl, shortDate, timeLabel } from "./ui.js";
+import { bracket, matchRow, renderFixtures, renderMatch, scheduleFilters } from "./fixtures.js?v=3";
+import { registerLabel, renderRegistration } from "./registration.js?v=3";
+import { findEntry, renderEntries } from "./entries.js?v=3";
+import { enableSharing, enhanceSelects, href, longDate, shareControl, shortDate, timeLabel } from "./ui.js?v=3";
 
-import { icon, sportMark } from "./graphics.js";
+import { icon, sportMark } from "./graphics.js?v=3";
 
 const main = document.querySelector("main");
 const eligibilityOptions = [
@@ -24,14 +24,15 @@ const deadline = sport => `${shortDate.format(new Date(sport.closes))}, ${timeLa
 const eventFee = kind => `${fees[kind].amount} ${fees[kind].unit}`;
 const eventPath = (sport, category) => `/tournaments/${sport.id}${category ? `/${category.id}` : ""}`;
 function readRoute() {
-  const [path, query] = location.hash.slice(1).split("?");
+  const [rawPath, query] = location.hash.slice(1).split("?");
+  const path = !rawPath || rawPath === "/" ? "/" : rawPath.replace(/\/+$/, "");
   const params = new URLSearchParams(query);
   const filters = new URLSearchParams();
   if (getSport(params.get("sport"))) filters.set("sport", params.get("sport"));
   if (eligibilityOptions.some(([value]) => value === params.get("eligibility"))) {
     filters.set("eligibility", params.get("eligibility"));
   }
-  return { path: path || "/", filters, query: params };
+  return { path, filters, query: params };
 }
 
 function tournamentList(tournaments, filters) {
@@ -159,6 +160,7 @@ function renderHome(filters) {
     updateFilters();
   });
   for (const [key, value] of filters) form.elements[key].value = value;
+  enhanceSelects(form);
   renderBoard(filters);
 }
 
@@ -227,18 +229,22 @@ function renderRoute(moveFocus = false) {
   const entrySection = section === "entries" || (section === "register" && extra === "edit-roster");
   const active = entrySection ? "#/entries" : section === "matches" || path === "/fixtures" ? "#/fixtures" : "#/";
   for (const link of document.querySelectorAll(".primary-nav a")) {
-    if (link.hash === active) link.setAttribute("aria-current", "true");
+    if (link.getAttribute("href") === active) link.setAttribute("aria-current", "true");
     else link.removeAttribute("aria-current");
   }
   let focusTarget = "h1";
   if (path === "/") {
     document.title = "Tournaments · UniSports";
     renderHome(filters);
-  } else if (section === "entries" || (section === "register" && sport && categoryId && category &&
+  } else if ((section === "entries" && !categoryId) || (section === "register" && sport && categoryId && category &&
       /^\/register\/[^/]+\/[^/]+(?:\/edit-roster)?(?:\/review)?$/.test(path))) {
     try {
       if (section === "entries") {
-        renderEntries(main, sportId, query.get("updated") === "1");
+        let entryId = sportId;
+        if (entryId) {
+          try { entryId = decodeURIComponent(entryId); } catch { entryId = "\0"; }
+        }
+        renderEntries(main, entryId, query.get("updated") === "1");
         if (query.has("updated")) history.replaceState(null, "", "#" + path);
       } else {
         focusTarget = renderRegistration(main, sport, category, path.endsWith("/review") ? "review" : "details", query, extra === "edit-roster");
@@ -273,7 +279,7 @@ function renderRoute(moveFocus = false) {
     main.innerHTML = '<div class="page-heading"><h1 tabindex="-1">Page unavailable</h1></div><p>We couldn’t find this page. <a href="#/">Browse tournaments</a></p>';
   }
 
-  if (moveFocus || focusTarget === "#bracket-title") main.querySelector(focusTarget).focus();
+  if (moveFocus || focusTarget === "#bracket-title") main.querySelector(focusTarget)?.focus();
   lastSport = section === "tournaments" ? sport?.id : undefined;
 }
 
