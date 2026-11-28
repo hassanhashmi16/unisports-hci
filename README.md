@@ -12,6 +12,8 @@ python -m http.server 8000 --bind 127.0.0.1
 
 Open [localhost:8000](http://localhost:8000/) to browse and filter tournaments, check deadlines and fees, and open a shareable event category. The season board uses 2 December 2026. Add `?later` to the URL before the hash to inspect the board after registration closes.
 
+Open [the UniSports landing page](http://localhost:8000/landing.html) to follow the ball through a dribble, sliding tackle and shot. The page links directly to tournaments and fixtures and uses stills from the same play when reduced motion is enabled.
+
 In **Fixtures & Results**, look up Falcons to see the revised volleyball semifinal. Switch to **Results** and search for Omar to follow the completed chess quarterfinal into its bracket. A match's copy-link action shares its public details. The browser Back action restores the preceding list and filters.
 
 To try registration, open Football, choose **Register a team**, and enter a team name and five fictional players. Use **Continue to review**, then **Submit entry**. The receipt gives the team's reference, payment instructions and verification status. Open **My Entries** to revisit it after refresh or correct its roster before the deadline. Saving a correction keeps the reference. The confirmed Falcons entry demonstrates the outcome of office verification and links to its rescheduled semifinal.

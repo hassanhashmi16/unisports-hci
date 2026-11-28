@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#233ea6">
+  <meta name="description" content="Discover FAST Lahore tournaments, enter your sport and follow every fixture with UniSports.">
+  <title>UniSports — Campus tournaments at FAST Lahore</title>
+  <link rel="icon" href="./assets/unisports.svg">
+  <link rel="preload" href="./assets/fonts/bricolage-grotesque.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./landing.css">
+  <script type="module" src="./landing.js"></script>
+</head>
+<body class="landing">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="landing-header">
+    <div class="landing-wrap landing-nav">
+      <a class="brand" href="./landing.html" aria-label="UniSports home"><img src="./assets/unisports.svg" alt="" width="36" height="36"><strong>UniSports</strong></a>
+      <nav aria-label="Main navigation">
+        <a class="how-link" href="#enter">How it works</a>
+        <a class="nav-action" href="./index.html#/">Open UniSports</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main" tabindex="-1">
+    <div class="match-story" data-story>
+      <div class="pitch-layer" aria-hidden="true">
+        <canvas class="pitch" data-pitch></canvas>
+      </div>
+      <section class="story-chapter opening" aria-labelledby="landing-title">
+        <div class="landing-wrap">
+          <div class="chapter-text">
+            <p class="landing-label">FAST Lahore <span>/</span> Campus sports</p>
+            <h1 id="landing-title">Campus<br><em>in play.</em></h1>
+            <p class="landing-lead">Find your tournament, enter solo or with a team, and follow every fixture in one place.</p>
+            <div class="landing-actions">
+              <a class="landing-button" href="./index.html#/">Browse tournaments</a>
+              <a class="text-link" href="./index.html#/fixtures">Find a match</a>
+            </div>
+          </div>
+        </div>
+        <div class="story-foot landing-wrap"><a href="#enter"><span aria-hidden="true">↓</span> How it works</a></div>
+      </section>
+      <section class="story-chapter chapter-entry" id="enter" aria-labelledby="enter-title">
+        <div class="landing-wrap">
+          <div class="chapter-text">
+            <p class="landing-label">Tournament entry</p>
+            <h2 id="enter-title">Make the<br><em>team sheet.</em></h2>
+            <p class="landing-lead">Check eligibility, entry fees and deadlines. Once you register, your receipt explains what to take to the Student Centre.</p>
+            <a class="text-link" href="./index.html#/tournaments/football">Football · 5–8 players · Rs 1,500 per team</a>
+          </div>
+        </div>
+      </section>
+      <section class="story-chapter chapter-follow" id="follow" aria-labelledby="follow-title">
+        <div class="landing-wrap">
+          <div class="chapter-text">
+            <p class="landing-label">Fixtures &amp; results</p>
+            <h2 id="follow-title">Know where.<br><em>Know when.</em></h2>
+            <p class="landing-lead">Search by sport, team or player. When a fixture moves, find its revised time and venue together.</p>
+            <a class="text-link" href="./index.html#/matches/volleyball-falcons-rovers">Falcons vs Rovers · 4:30 PM, Court 2</a>
+          </div>
+        </div>
+      </section>
+    </div>
+    <section class="landing-close" aria-labelledby="close-title">
+      <div class="landing-wrap close-inner">
+        <div><h2 id="close-title">Your next match starts here.</h2><p>See what’s on at FAST Lahore.</p></div>
+        <a class="landing-button" href="./index.html#/">Browse tournaments</a>
+      </div>
+    </section>
+  </main>
+  <footer class="landing-wrap landing-footer"><strong>UniSports</strong><span>FAST Lahore · Classroom prototype</span></footer>
+</body>
+</html>
