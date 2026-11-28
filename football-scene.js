@@ -245,8 +245,8 @@ function runnerPose(t,stride) {
   const gather=ease(.709,plantTime,t);
   // Slow the kicking leg through its forward arc, anchored at contact.
   // Blend back to scene time outside the swing to join the run and recovery.
-  const swingWindow=ease(.711,.727,t)*(1-ease(.773,.80,t));
-  const swingTime=mix(t,strikeTime,.40*swingWindow);
+  const swingWindow=ease(.711,.727,t)*(1-ease(.773,.81,t));
+  const swingTime=mix(t,strikeTime,.45*swingWindow);
   const release=ease(.737,.779,t);
   const recover=ease(.782,.866,t);
   const followThrough=ease(strikeTime,.770,t)*(1-recover);
@@ -277,8 +277,8 @@ function runnerPose(t,stride) {
       // Thigh leads. The flexed knee keeps the heel back until the lower
       // leg swings through impact. Both angles keep moving past contact.
       const drive=ease(.724,.765,swingTime);
-      // Compress the knee extension around the same boot-to-ball contact pose.
-      const snap=ease(.734,.762,strikeTime+(swingTime-strikeTime)*1.18);
+      // Ease the knee extension through the same boot-to-ball contact pose.
+      const snap=ease(.734,.762,strikeTime+(swingTime-strikeTime)*1.10);
       const windup=ease(.714,plantTime,swingTime)*(1-ease(plantTime,strikeTime,swingTime));
       const upper=mix(-.25,1.29,drive)-.70*windup+.07*followThrough;
       const lower=mix(-1.65,1.38,snap)-.42*windup;
