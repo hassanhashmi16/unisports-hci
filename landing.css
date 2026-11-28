@@ -29,7 +29,7 @@
 .story-chapter { position: relative; display: flex; align-items: center; min-height: 140svh; padding-block: 6rem; }
 .opening { min-height: 100svh; padding-block: 7rem 5rem; }
 .live-pitch .chapter-entry { min-height: 205svh; }
-.live-pitch .chapter-follow { min-height: 200svh; }
+.live-pitch .chapter-follow { min-height: 232svh; }
 .chapter-text { width: min(42%, 35rem); }
 .chapter-entry .chapter-text { margin-left: auto; }
 .landing-label { font-size: .85rem; letter-spacing: .085em; font-weight: 700; text-transform: uppercase; }
@@ -66,7 +66,7 @@
   .nav-action { padding-inline: .85rem; }
   .story-chapter { align-items: flex-start; min-height: 120svh; padding-block: 5.5rem; }
   .live-pitch .chapter-entry { min-height: 170svh; }
-  .live-pitch .chapter-follow { min-height: 175svh; }
+  .live-pitch .chapter-follow { min-height: 207svh; }
   .opening { min-height: max(100svh, 42rem); }
   .chapter-text { width: min(100%, 27rem); }
   .chapter-entry .chapter-text { margin-left: 0; }

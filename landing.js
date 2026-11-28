@@ -53,12 +53,20 @@ function resize() {
   top = story.getBoundingClientRect().top + scrollY;
   const entry = entryChapter.offsetTop;
   const fixtures = fixturesChapter.offsetTop;
+  const goalScroll = (fixturesChapter.offsetHeight-height)*.71;
   beats = [
     [0,0],
     [entry,.28],
     [entry+(entryChapter.offsetHeight-height)*.45,.43],
     [fixtures,.69],
-    [fixtures+(fixturesChapter.offsetHeight-height)*.62,.93],
+    // Spend more scroll travel on the backswing and boot contact, then
+    // pick up the pace again as the ball heads toward the keeper.
+    [fixtures+goalScroll*.055,.708],
+    [fixtures+goalScroll*.14,.725],
+    [fixtures+goalScroll*.34,.75],
+    [fixtures+goalScroll*.575,.778],
+    [fixtures+goalScroll*.69,.804],
+    [fixtures+goalScroll,.93],
     [story.offsetHeight-height,1],
   ];
   progress = target = position();

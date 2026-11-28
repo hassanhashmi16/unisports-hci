@@ -63,14 +63,20 @@ function brush(ctx, points, width, color, bias = .5) {
   ctx.closePath(); ctx.fill();
 }
 
+// Match run speed at contact, then let the planted leg brake the body.
+function shotTravel(t) {
+  return 17*Math.min(t,strikeTime)+.34*(1-Math.exp(-50*Math.max(0,t-strikeTime)));
+}
+
 function play(t) {
   const charge = Math.min(t,.75);
   const stride = .12 + charge * dribblePace;
   const phase = stride * 2 * PI;
   const cut = ease(.27,.44,t) - .74*ease(.48,.66,t);
   const x = -.68*cut + .027*Math.sin(phase)*(1-ease(.65,.75,t));
-  const z = 17*charge + .34*ease(.75,.89,t);
-  const lift = .26*Math.sin(PI*ease(.34,.49,t));
+  const z = shotTravel(t);
+  const airborne = clamp((t-.346)/.074);
+  const lift = .145*4*airborne*(1-airborne);
   // Left-foot touches occur just before that boot comes down. Between
   // touches the ball rolls ahead, slows and is caught by the next stride.
   const roll = (stride+.54)%1;
@@ -80,7 +86,9 @@ function play(t) {
     17*charge + .48 + lead];
   const contact = [-.68*.26+.19, .13, 17*.75+.52];
   const planted = between(runBall,contact,ease(.68,.75,t));
-  const flight = clamp((t-strikeTime)/(impactTime-strikeTime));
+  const elapsed = clamp((t-strikeTime)/(impactTime-strikeTime));
+  // Put a little more of the flight distance into the initial release.
+  const flight = elapsed + .18*elapsed*(1-ease(0,.60,elapsed));
   const ball = between(planted,[targetX,targetY,netDepth-.12],flight);
   ball[1] += 2.4*flight*(1-flight);
   if (t > impactTime) {
@@ -198,6 +206,8 @@ function runningLeg(side, cycle, hips) {
 }
 
 function runnerPose(t,stride) {
+  const plantTime=.735;
+  stride+=(7-(.12+plantTime*dribblePace))*ease(.57,.70,t);
   const swing = Math.sin(stride*2*PI);
   const bounce = -.027*Math.cos((stride-.12)*4*PI);
   const lean = .244+.075*ease(.28,.42,t)-.075*ease(.48,.6,t);
@@ -216,48 +226,78 @@ function runnerPose(t,stride) {
   function blendSide(side,parts,weight) {
     pose[side]=pose[side].map((p,i)=>between(p,parts[i],weight));
   }
-  const leap=Math.sin(PI*ease(.34,.49,t));
-  for(const s of [-1,1]) {
-    blendSide(s,[[s*.22,1.49,.22],[s*.41,1.30,.12+.28*s],[s*.50,1.39,.21+.42*s],
-      [s*.14,.92,0],[s*.20,.73,.30*s],[s*.21,.47,.47*s-.10]],leap);
+  // A single running bound: the front knee clears the boot, the rear heel
+  // folds under the hip, then the front foot reaches the turf first.
+  const bound=ease(.321,.363,t)*(1-ease(.407,.446,t));
+  const landing=ease(.37,.420,t);
+  for (const side of [-1,1]) {
+    const front=side===1;
+    const thigh=[side*.11,.842,0];
+    const ankle=front?[.12,mix(.32,.078,landing),mix(.27,.39,landing)]:
+      [-.13,mix(.18,.34,landing),mix(-.48,-.21,landing)];
+    const leg=reachJoint(thigh,ankle,[side*.08,.06,1],.445,.445);
+    const shoulder=[side*.20,1.38,.25];
+    const elbow=[side*.25,1.16,front?.03:.39];
+    const wrist=[side*.24,1.22,front?.25:.58];
+    blendSide(side,[shoulder,elbow,wrist,...leg],bound);
   }
-  const wind=ease(.65,.725,t), contact=ease(.726,.75,t), kick=ease(.75,.79,t), rest=ease(.84,.99,t);
-  const transfer = wind*(1-rest);
-  pose.chest=between(pose.chest,[-.067,1.412,.13],transfer);
-  pose.head=between(pose.head,[-.082,1.708,.18],transfer);
-  const weightShift=.070*wind-.115*rest;
-  pose.hip[0]-=weightShift;
-  pose.chest[0]-=.6*weightShift;
-  pose.head[0]-=.45*weightShift;
-  for (const s of [-1,1]) {
-    const support=s===-1;
-    const plant = .40+17*(.75-Math.max(.733,Math.min(t,.75)))-.34*ease(.75,.89,t);
-    const coil=[[s*.21-.055,support?1.42:1.46,.105],
-      [support?-.41:.33,support?1.29:1.22,support?.02:-.09],
-      [support?-.49:.29,support?1.33:1.29,support?.14:.11],
-      [s*.117,.884,0], [support?-.15:.29,support?.48:.52,support?.37:-.23],
-      [support?-.16:.38,support?.08:.56,support?plant:-.60]];
-    const strike=[[s*.22-.055,support?1.43:1.46,.115],
-      [support?-.44:.31,support?1.28:1.21,.06],
-      [support?-.53:.22,support?1.30:1.29,support?.18:.31],
-      [s*.117,.894,0],[s*.15,support?.48:.71,support?.32:.45],[s*.16,support?.08:.50,support?plant:.76]];
-    const standing=[[s*.21,1.46,.10],[s*.31,1.20,.05-.10*s],[s*.32,1.09,.24-.13*s],
-      [s*.117,.884,0],[s*.15,support?.49:.54,support?.16:.28],
-      [s*.16,.08,support?plant:.36]];
-    const impact = coil.map((p,i)=>between(p,strike[i],.48));
-    if (!support) {
-      impact[4]=[.16,.49,.28];
-      impact[5]=[.18,.14,.37];
+  if (t<.709) return pose;
+  const gather=ease(.709,plantTime,t);
+  // Slow the kicking leg through its forward arc, anchored at contact.
+  // Blend back to scene time outside the swing to join the run and recovery.
+  const swingWindow=ease(.711,.727,t)*(1-ease(.773,.80,t));
+  const swingTime=mix(t,strikeTime,.40*swingWindow);
+  const release=ease(.737,.779,t);
+  const recover=ease(.782,.866,t);
+  const followThrough=ease(strikeTime,.770,t)*(1-recover);
+  const hipX=mix(-.058,.018,recover);
+  const hipY=.85+.045*release-.030*recover;
+  pose.hip=between(pose.hip,[hipX,hipY,0],gather);
+  pose.chest=between(pose.chest,[hipX-.038,hipY+.522,.245-.14*recover+.035*followThrough],gather);
+  pose.head=between(pose.head,[hipX-.048,hipY+.758,.34-.19*recover+.035*followThrough],gather);
+
+  for (const side of [-1,1]) {
+    const support=side===-1;
+    const twist=side*((-.083+.178*release)*(1-recover)+.033*followThrough);
+    const shoulder=offset(pose.chest,side*.205,0,twist);
+    const spread=(support?.24:.14)*(1-recover);
+    const elbow=offset(shoulder,side*(.065+spread),-.19,.04+twist);
+    const wrist=offset(elbow,side*spread*.35,-.055,.215);
+    const thigh=offset(pose.hip,side*.113,0,0);
+    let leg;
+    if (support) {
+      // Before touchdown keep the actual running leg. From touchdown onward
+      // its target is one fixed spot beside the ball in pitch coordinates.
+      if (t<plantTime) leg=pose[side].slice(3);
+      else {
+        const ankle=[-.112,.08,shotTravel(plantTime)+.44-shotTravel(t)];
+        leg=reachJoint(thigh,ankle,[-.09,.05,1],.45,.444);
+      }
+    } else {
+      // Thigh leads. The flexed knee keeps the heel back until the lower
+      // leg swings through impact. Both angles keep moving past contact.
+      const drive=ease(.724,.765,swingTime);
+      // Compress the knee extension around the same boot-to-ball contact pose.
+      const snap=ease(.734,.762,strikeTime+(swingTime-strikeTime)*1.18);
+      const windup=ease(.714,plantTime,swingTime)*(1-ease(plantTime,strikeTime,swingTime));
+      const upper=mix(-.25,1.29,drive)-.70*windup+.07*followThrough;
+      const lower=mix(-1.65,1.38,snap)-.42*windup;
+      // Open the swing plane slightly so the rear camera sees the heel
+      // sweep outside the hip before the leg straightens toward the ball.
+      const open=.22*windup;
+      function legSegment(start,length,angle,lateral) {
+        const forward=length*Math.sin(angle);
+        return offset(start,lateral*Math.cos(open)-forward*Math.sin(open),
+          -length*Math.cos(angle),lateral*Math.sin(open)+forward*Math.cos(open));
+      }
+      const knee=legSegment(thigh,.45,upper,.018);
+      const ankle=legSegment(knee,.444,lower,.086-.15*ease(strikeTime,.781,swingTime));
+      const settled=reachJoint(thigh,[.12,.081,.36],[.13,.04,1],.45,.444);
+      leg=[thigh,between(knee,settled[1],recover),between(ankle,settled[2],recover)];
     }
-    blendSide(s,coil,wind); blendSide(s,impact,contact);
-    blendSide(s,strike,kick); blendSide(s,standing,rest);
-    if (wind) {
-      const joints=pose[s];
-      joints[3][0]-=weightShift;
-      const solved=reachJoint(joints[3],joints[5],[s*.13,.03,1],.45,.444);
-      joints[4]=between(joints[4],solved[1],wind);
-      joints[5]=between(joints[5],solved[2],wind);
-    }
+    const legBlend=support?gather:ease(.709,plantTime,swingTime);
+    const shotPose=[shoulder,elbow,wrist,...leg];
+    pose[side]=pose[side].map((joint,i)=>between(joint,shotPose[i],i<3?gather:legBlend));
   }
   return pose;
 }
@@ -490,7 +530,7 @@ function athlete(ctx,view,feet,pose,role='runner') {
   const depth = view.depth(feet);
   if (depth < 1.4) return;
   const size = view.scale(feet);
-  const build = away ? 1 : 1.065;
+  const build = away ? 1 : .94;
   const place = p => {
     const [x,y,z] = pose.transform ? pose.transform(p) : p;
     return offset(feet,x*direction*build,y,z*direction);
@@ -656,7 +696,7 @@ function athlete(ctx,view,feet,pose,role='runner') {
       [offset(head,0,.076,-.011),.067,.074],[offset(head,0,.111,-.026),.030,.036]],fills.skin,.013);
     hair(ctx,point,head,look,cameraSide,size,fills.hair,ink);
   } else {
-    drawPortrait(ctx,point(head),view.scale(place(head)),view.orbit);
+    drawPortrait(ctx,point(head),view.scale(place(head))*1.07,view.orbit);
   }
   ctx.restore();
 }
