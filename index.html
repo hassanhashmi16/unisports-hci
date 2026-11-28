@@ -7,8 +7,8 @@
   <title>UniSports · FAST Lahore</title>
   <link rel="icon" type="image/svg+xml" href="./assets/unisports.svg">
   <link rel="preload" href="./assets/fonts/bricolage-grotesque.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css">
-  <script type="module" src="./app.js"></script>
+  <link rel="stylesheet" href="./styles.css?v=3">
+  <script type="module" src="./app.js?v=3"></script>
 </head>
 <body>
   <a class="skip-link" href="#content">Skip to content</a>
@@ -19,6 +19,7 @@
         <strong>UniSports</strong>
       </a>
       <nav class="primary-nav" aria-label="Main navigation">
+        <a href="./landing.html">Home</a>
         <a href="#/" aria-current="true">Tournaments</a>
         <a href="#/fixtures">Fixtures &amp; Results</a>
         <a href="#/entries">My Entries</a>
@@ -27,7 +28,19 @@
     </div>
   </header>
   <main id="content" class="shell" tabindex="-1"></main>
-  <footer class="site-footer"><div class="shell"><strong>UniSports</strong><span>FAST Lahore · Classroom prototype</span></div></footer>
+  <footer class="site-footer">
+    <div class="shell site-footer-inner">
+      <div class="site-footer-brand">
+        <strong>UniSports</strong>
+        <span>FAST-NUCES Lahore · Applied HCI prototype</span>
+      </div>
+      <ul class="site-footer-team" aria-label="Project team">
+        <li><span>Daniyal Shoaib</span><span class="roll">24L-3013</span></li>
+        <li><span>Muhammad Ismail Qureshi</span><span class="roll">24L-0811</span></li>
+        <li><span>Hassan Saeed Hashmi</span><span class="roll">24L-2569</span></li>
+      </ul>
+    </div>
+  </footer>
   <noscript><p class="shell">Enable JavaScript to browse tournaments and fixtures.</p></noscript>
 </body>
 </html>

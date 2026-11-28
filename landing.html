@@ -8,9 +8,9 @@
   <title>UniSports — Campus tournaments at FAST Lahore</title>
   <link rel="icon" href="./assets/unisports.svg">
   <link rel="preload" href="./assets/fonts/bricolage-grotesque.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./landing.css">
-  <script type="module" src="./landing.js"></script>
+  <link rel="stylesheet" href="./styles.css?v=3">
+  <link rel="stylesheet" href="./landing.css?v=3">
+  <script type="module" src="./landing.js?v=5"></script>
 </head>
 <body class="landing">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -18,7 +18,6 @@
     <div class="landing-wrap landing-nav">
       <a class="brand" href="./landing.html" aria-label="UniSports home"><img src="./assets/unisports.svg" alt="" width="36" height="36"><strong>UniSports</strong></a>
       <nav aria-label="Main navigation">
-        <a class="how-link" href="#enter">How it works</a>
         <a class="nav-action" href="./index.html#/">Open UniSports</a>
       </nav>
     </div>
@@ -40,7 +39,6 @@
             </div>
           </div>
         </div>
-        <div class="story-foot landing-wrap"><a href="#enter"><span aria-hidden="true">↓</span> How it works</a></div>
       </section>
       <section class="story-chapter chapter-entry" id="enter" aria-labelledby="enter-title">
         <div class="landing-wrap">
@@ -62,14 +60,39 @@
           </div>
         </div>
       </section>
+      <section class="story-chapter chapter-goal" id="goal" aria-labelledby="goal-title">
+        <div class="landing-wrap">
+          <div class="chapter-text">
+            <p class="landing-label">Match day ready</p>
+            <h2 id="goal-title">Step onto<br><em>the pitch.</em></h2>
+            <p class="landing-lead">Everything from eligibility and team sheets to kickoff times and brackets is ready in the portal.</p>
+            <div class="landing-actions">
+              <a class="landing-button" href="./index.html#/">Enter UniSports</a>
+              <a class="text-link" href="./index.html#/fixtures">View fixtures</a>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
-    <section class="landing-close" aria-labelledby="close-title">
-      <div class="landing-wrap close-inner">
-        <div><h2 id="close-title">Your next match starts here.</h2><p>See what’s on at FAST Lahore.</p></div>
-        <a class="landing-button" href="./index.html#/">Browse tournaments</a>
-      </div>
-    </section>
   </main>
-  <footer class="landing-wrap landing-footer"><strong>UniSports</strong><span>FAST Lahore · Classroom prototype</span></footer>
+  <footer class="landing-footer" id="footer">
+    <div class="landing-wrap footer-inner">
+      <div class="footer-brand">
+        <a class="brand" href="./landing.html" aria-label="UniSports home">
+          <img src="./assets/unisports.svg" alt="" width="32" height="32">
+          <strong>UniSports</strong>
+        </a>
+        <p>FAST-NUCES Lahore · Applied Human Computer Interaction</p>
+      </div>
+      <div class="footer-team" aria-label="Project team">
+        <span class="footer-heading">Project team</span>
+        <ul class="team-list">
+          <li><span>Daniyal Shoaib</span><span class="roll">24L-3013</span></li>
+          <li><span>Muhammad Ismail Qureshi</span><span class="roll">24L-0811</span></li>
+          <li><span>Hassan Saeed Hashmi</span><span class="roll">24L-2569</span></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>

@@ -12,6 +12,8 @@ const paths = {
   arrow: '<path d="M4 12h15m-6-6 6 6-6 6"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   ticket: '<path d="M3 5h18v5a2 2 0 0 0 0 4v5H3v-5a2 2 0 0 0 0-4zM15 5v2m0 3v4m0 3v2"/>',
+  chevron: '<path d="m6 9 6 6 6-6"/>',
+  check: '<path d="m5 12 4.5 4.5L19 7"/>',
 };
 
 export function icon(name) {

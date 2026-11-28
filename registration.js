@@ -1,8 +1,8 @@
-import { fees, isOpen } from "./data.js";
-import { shortDate, timeLabel, escapeText } from "./ui.js";
-import { canEditRoster, findEntry, saveEntry } from "./entries.js";
+import { fees, isOpen } from "./data.js?v=3";
+import { shortDate, timeLabel, escapeText } from "./ui.js?v=3";
+import { canEditRoster, findEntry, saveEntry } from "./entries.js?v=3";
 
-import { sportMark } from "./graphics.js";
+import { sportMark } from "./graphics.js?v=3";
 
 // Drafts belong to this tab and event. Only a later submission creates an entry.
 const drafts = new Map();
